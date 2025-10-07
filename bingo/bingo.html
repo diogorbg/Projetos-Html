@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="DiogoRBG">
+  <title>Bingo</title>
+
+  <style>
+    /* ======================================================= */
+    /* CSS: Estilização */
+    /* (Mantida a partir do código anterior para consistência) */
+    /* ======================================================= */
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    h1,
+    h2 {
+      color: #004d99;
+    }
+
+    header {
+      padding: 10px 0;
+      background-color: #e0e0e0;
+    }
+
+    /* --- Área de Destaque do Último Número (TOP 3) --- */
+    #last-number-box {
+      background-color: #004d99;
+      padding: 20px;
+      margin: 20px auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 1000px;
+    }
+
+    #last-numbers-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 80px;
+      margin-top: 10px;
+    }
+
+    .drawn-display {
+      font-weight: 900;
+      color: white;
+      line-height: 1;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #last-number {
+      font-size: 10em;
+    }
+
+    #second-last,
+    #third-last,
+    #fourth-last {
+      font-size: 5em;
+      color: white;
+      opacity: 0.7;
+    }
+
+    /* --- Interface de Marcação (Botões BINGO) --- */
+    #number-picker {
+      padding: 20px;
+      background-color: #fff;
+      margin: 20px 0;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+    }
+
+    #bingo-grid {
+      max-width: 1000px;
+      margin: 20px auto;
+      border: 2px solid #004d99;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .bingo-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .bingo-letter {
+      font-size: 2em;
+      font-weight: bold;
+      color: #004d99;
+      width: 40px;
+      text-align: center;
+      margin-right: 10px;
+    }
+
+    .number-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+    }
+
+    .number-buttons button {
+      font-size: 1.9em;
+      width: 58px;
+      height: 58px;
+      cursor: pointer;
+      background-color: #dee4eb;
+      color: white;
+      border: none;
+      border-radius: 29px;
+      transition: background-color 0.2s;
+      font-weight: bold;
+    }
+
+    .number-buttons button:hover {
+      background-color: #004d998e;
+    }
+
+    .number-buttons button.drawn {
+      background-color: #004d99;
+      /* Números já sorteados */
+      color: white;
+      cursor: pointer;
+      /* Mantemos o cursor de clique para indicar que pode desmarcar */
+      border: none;
+      opacity: 1;
+      /* Aumenta a opacidade para fácil visualização */
+    }
+
+    /* Estilo do Botão de Reset */
+    #reset-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      background-color: #cc0000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #reset-button:hover {
+      background-color: #990000;
+    }
+  </style>
+</head>
+
+<body onload="loadGame()">
+  <!-- <header>
+    <h1>Bingo</h1>
+  </header> -->
+
+  <div id="display-area">
+    <div id="last-number-box">
+      <!-- <h2>Os Últimos 3 Números Sorteados</h2> -->
+      <div id="last-numbers-container">
+        <div id="last-number" class="drawn-display">--</div>
+      </div>
+
+      <div id="last-numbers-container">
+        <div id="second-last" class="drawn-display">--</div>
+        <div id="third-last" class="drawn-display">--</div>
+        <div id="fourth-last" class="drawn-display">--</div>
+      </div>
+
+    </div>
+  </div>
+
+  <main>
+    <div id="number-picker">
+      <h2>Números Sorteados</h2>
+      <div id="bingo-grid">
+        <div class="bingo-row">
+          <div class="bingo-letter">B</div>
+          <div id="row-B" class="number-buttons"></div>
+        </div>
+        <div class="bingo-row">
+          <div class="bingo-letter">I</div>
+          <div id="row-I" class="number-buttons"></div>
+        </div>
+        <div class="bingo-row">
+          <div class="bingo-letter">N</div>
+          <div id="row-N" class="number-buttons"></div>
+        </div>
+        <div class="bingo-row">
+          <div class="bingo-letter">G</div>
+          <div id="row-G" class="number-buttons"></div>
+        </div>
+        <div class="bingo-row">
+          <div class="bingo-letter">O</div>
+          <div id="row-O" class="number-buttons"></div>
+        </div>
+      </div>
+
+      <button id="reset-button" onclick="confirmReset()">Reiniciar Jogo</button>
+    </div>
+  </main>
+
+  <script>
+    // =======================================================
+    // JAVASCRIPT: Lógica de Marcação e Desmarcação Segura
+    // =======================================================
+
+    let drawnHistory = [];
+
+    const lastNumberDisplay = document.getElementById('last-number');
+    const secondLastDisplay = document.getElementById('second-last');
+    const thirdLastDisplay = document.getElementById('third-last');
+    const fourthLastDisplay = document.getElementById('fourth-last');
+
+    const LOCAL_STORAGE_KEY = 'bingoDrawnNumbers';
+
+    const rowsMap = {
+      'B': { min: 1, max: 15, element: document.getElementById('row-B') },
+      'I': { min: 16, max: 30, element: document.getElementById('row-I') },
+      'N': { min: 31, max: 45, element: document.getElementById('row-N') },
+      'G': { min: 46, max: 60, element: document.getElementById('row-G') },
+      'O': { min: 61, max: 75, element: document.getElementById('row-O') }
+    };
+
+    // --- Funções de Ajuda ---
+    function getBingoLetter(number) {
+      if (number >= 1 && number <= 15) return 'B';
+      if (number >= 16 && number <= 30) return 'I';
+      if (number >= 31 && number <= 45) return 'N';
+      if (number >= 46 && number <= 60) return 'G';
+      if (number >= 61 && number <= 75) return 'O';
+      return '';
+    }
+
+    // --- Geração de Botões (Executa no início) ---
+    function generateBingoGrid() {
+      for (const letter in rowsMap) {
+        const row = rowsMap[letter];
+        for (let i = row.min; i <= row.max; i++) {
+          const button = document.createElement('button');
+          button.textContent = i;
+          button.value = i;
+          button.onclick = () => handleNumberClick(i); // Novo manipulador de clique
+          row.element.appendChild(button);
+        }
+      }
+    }
+
+    // --- NOVO: Manipulador de Clique Principal ---
+    function handleNumberClick(number) {
+      const num = parseInt(number);
+
+      if (drawnHistory.includes(num)) {
+        // Se o número JÁ ESTÁ sorteado
+        confirmUndo(num);
+      } else {
+        // Se o número NÃO ESTÁ sorteado
+        drawNumber(num);
+      }
+    }
+
+    // --- Lógica de Sorteio (Marcar) ---
+    function drawNumber(num) {
+      if (drawnHistory.includes(num)) {
+        return; // Já sorteado, ignora
+      }
+
+      drawnHistory.push(num);
+      markButtonAsDrawn(num, true); // True = Marcar
+      saveGame();
+      updateDisplays();
+    }
+
+    // --- NOVO: Lógica de Desmarcação (Undo) ---
+    function confirmUndo(num) {
+      const letter = getBingoLetter(num);
+      const confirmation = confirm(`ATENÇÃO: Deseja desmarcar o número ${letter}-${num} do sorteio?`);
+
+      if (confirmation) {
+        undoDraw(num);
+      }
+    }
+
+    function undoDraw(num) {
+      // Remove o número do histórico
+      const index = drawnHistory.indexOf(num);
+      if (index > -1) {
+        drawnHistory.splice(index, 1);
+      }
+
+      markButtonAsDrawn(num, false); // False = Desmarcar
+      saveGame();
+      updateDisplays();
+    }
+
+    // --- Função Comum para Marcar/Desmarcar o Botão ---
+    function markButtonAsDrawn(number, isDrawn) {
+      const letter = getBingoLetter(number);
+      const targetRow = rowsMap[letter].element;
+      const button = Array.from(targetRow.children).find(btn => parseInt(btn.value) === number);
+
+      if (button) {
+        if (isDrawn) {
+          button.classList.add('drawn');
+          // Não desabilitamos o botão mais, pois ele precisa ser clicável para desmarcar
+          // button.disabled = true; 
+        } else {
+          button.classList.remove('drawn');
+          // button.disabled = false;
+        }
+      }
+    }
+
+    // --- Atualização da Tela (Top 3) ---
+    function updateDisplays() {
+      const last = drawnHistory[drawnHistory.length - 1];
+      const secondLast = drawnHistory[drawnHistory.length - 2];
+      const thirdLast = drawnHistory[drawnHistory.length - 3];
+      const fourthLast = drawnHistory[drawnHistory.length - 4];
+
+      lastNumberDisplay.textContent = last ? `${getBingoLetter(last)}.${last}` : '--';
+      secondLastDisplay.textContent = secondLast ? `${getBingoLetter(secondLast)}.${secondLast}` : '--';
+      thirdLastDisplay.textContent = thirdLast ? `${getBingoLetter(thirdLast)}.${thirdLast}` : '--';
+      fourthLastDisplay.textContent = fourthLast ? `${getBingoLetter(fourthLast)}.${fourthLast}` : '--';
+    }
+
+
+    // --- Persistência de Dados (LocalStorage) ---
+    function saveGame() {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(drawnHistory));
+      } catch (e) {
+        console.error("Erro ao salvar dados no LocalStorage:", e);
+      }
+    }
+
+    function loadGame() {
+      generateBingoGrid();
+
+      try {
+        const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedData) {
+          const loadedHistory = JSON.parse(savedData);
+
+          loadedHistory.forEach(num => {
+            if (!drawnHistory.includes(num)) {
+              drawnHistory.push(num);
+              markButtonAsDrawn(num, true); // Marca o botão como sorteado
+            }
+          });
+
+          updateDisplays();
+        }
+      } catch (e) {
+        console.warn("Nenhum dado de jogo anterior encontrado ou erro ao carregar.", e);
+      }
+    }
+
+    // --- Botão de Reset (Mantido) ---
+    function confirmReset() {
+      const confirmation = confirm("ATENÇÃO: Você tem certeza que deseja REINICIAR o jogo? Todos os números sorteados serão perdidos.");
+
+      if (confirmation) {
+        resetGame();
+      }
+    }
+
+    function resetGame() {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      drawnHistory = [];
+
+      document.querySelectorAll('.number-buttons button').forEach(button => {
+        button.classList.remove('drawn');
+      });
+
+      updateDisplays();
+    }
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<!-- Não é tão bom quanto o bingo.html, mas estou mantendo como backup -->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bingo Automatizado</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* Destaque para o Último Número Sorteado */
+    #ultimoSorteado {
+      margin: 20px 0 40px;
+      padding: 30px;
+      background-color: #4CAF50;
+      /* Verde vibrante */
+      color: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #numeroDisplay {
+      font-size: 8em;
+      /* Super grande para o telão */
+      font-weight: bold;
+      text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease-in-out;
+      /* Suaviza a troca do número */
+    }
+
+    /* Painel de Controle e Botão */
+    #controle {
+      margin-bottom: 30px;
+    }
+
+    #btnSortear {
+      padding: 15px 30px;
+      font-size: 1.5em;
+      cursor: pointer;
+      background-color: #FF9800;
+      /* Laranja chamativo */
+      color: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px #e68a00;
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+
+    #btnSortear:hover {
+      background-color: #e68a00;
+    }
+
+    #btnSortear:active {
+      box-shadow: 0 2px #cc7a00;
+      transform: translateY(2px);
+    }
+
+    #btnSortear:disabled {
+      background-color: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* Tabela de Números Sorteados */
+    #tabelaSorteados {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      /* Espaço entre as colunas */
+      flex-wrap: wrap;
+      /* Garante responsividade em telas menores */
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .coluna {
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 150px;
+      /* Largura fixa para cada coluna */
+    }
+
+    .coluna h2 {
+      margin-top: 0;
+      color: #4CAF50;
+      font-size: 2em;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 10px;
+    }
+
+    .numeros-sorteados {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 1.2em;
+      text-align: left;
+    }
+
+    .numeros-sorteados li {
+      padding: 5px 0;
+      border-bottom: 1px dashed #eee;
+      transition: color 0.3s;
+    }
+
+    .numeros-sorteados li:last-child {
+      border-bottom: none;
+    }
+
+    /* Estilo para o número que acabou de ser sorteado na lista */
+    .recente {
+      font-weight: bold;
+      color: #FF9800;
+      background-color: #fff3e0;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- <header>
+    <h1>Painel Automatizado</h1>
+  </header> -->
+
+  <div id="ultimoSorteado">
+    <p style="font-size: 1.5em; margin: 0 0 10px;">ÚLTIMO NÚMERO SORTEADO:</p>
+    <div id="numeroDisplay">--</div>
+  </div>
+
+  <div id="controle">
+    <button id="btnSortear" onclick="sortearNumero()">
+      Sortear Próximo Número
+    </button>
+  </div>
+
+  <!-- <h2>Números Já Sorteados</h2> -->
+  <div id="tabelaSorteados">
+    <div class="coluna">
+      <h2>B (1-15)</h2>
+      <ul id="colunaB" class="numeros-sorteados"></ul>
+    </div>
+    <div class="coluna">
+      <h2>I (16-30)</h2>
+      <ul id="colunaI" class="numeros-sorteados"></ul>
+    </div>
+    <div class="coluna">
+      <h2>N (31-45)</h2>
+      <ul id="colunaN" class="numeros-sorteados"></ul>
+    </div>
+    <div class="coluna">
+      <h2>G (46-60)</h2>
+      <ul id="colunaG" class="numeros-sorteados"></ul>
+    </div>
+    <div class="coluna">
+      <h2>O (61-75)</h2>
+      <ul id="colunaO" class="numeros-sorteados"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Array com todos os números disponíveis para sorteio (1 a 75)
+    let numerosDisponiveis = Array.from({ length: 75 }, (_, i) => i + 1);
+    let numerosSorteados = [];
+    let ultimoNumero = null;
+
+    // Mapeamento das colunas
+    const colunas = {
+      'B': { min: 1, max: 15, element: document.getElementById('colunaB') },
+      'I': { min: 16, max: 30, element: document.getElementById('colunaI') },
+      'N': { min: 31, max: 45, element: document.getElementById('colunaN') },
+      'G': { min: 46, max: 60, element: document.getElementById('colunaG') },
+      'O': { min: 61, max: 75, element: document.getElementById('colunaO') }
+    };
+
+    const numeroDisplay = document.getElementById('numeroDisplay');
+    const btnSortear = document.getElementById('btnSortear');
+
+    function getLetra(numero) {
+      if (numero >= 1 && numero <= 15) return 'B';
+      if (numero >= 16 && numero <= 30) return 'I';
+      if (numero >= 31 && numero <= 45) return 'N';
+      if (numero >= 46 && numero <= 60) return 'G';
+      if (numero >= 61 && numero <= 75) return 'O';
+      return '';
+    }
+
+    function sortearNumero() {
+      if (numerosDisponiveis.length === 0) {
+        numeroDisplay.textContent = 'FIM!';
+        btnSortear.disabled = true;
+        alert('Todos os números foram sorteados! Fim de Jogo.');
+        return;
+      }
+
+      // 1. Escolher um número aleatório e único
+      const indiceAleatorio = Math.floor(Math.random() * numerosDisponiveis.length);
+      const numeroSorteado = numerosDisponiveis[indiceAleatorio];
+      const letra = getLetra(numeroSorteado);
+
+      // 2. Remover da lista de disponíveis e adicionar aos sorteados
+      numerosDisponiveis.splice(indiceAleatorio, 1);
+      numerosSorteados.push(numeroSorteado);
+      ultimoNumero = numeroSorteado;
+
+      // 3. Atualizar o Display Principal (Destaque)
+      numeroDisplay.textContent = letra + '-' + numeroSorteado;
+
+      // 4. Atualizar a Tabela de Sorteados
+      atualizarTabela();
+
+      // 5. Destacar o botão se for o último número
+      if (numerosDisponiveis.length === 0) {
+        btnSortear.textContent = 'Jogo Finalizado';
+      }
+    }
+
+    function atualizarTabela() {
+      // Limpar destaques antigos
+      document.querySelectorAll('.recente').forEach(el => el.classList.remove('recente'));
+
+      // Limpar todas as colunas
+      Object.values(colunas).forEach(col => col.element.innerHTML = '');
+
+      // Organizar e exibir os números
+      const sorteadosPorColuna = { 'B': [], 'I': [], 'N': [], 'G': [], 'O': [] };
+
+      numerosSorteados.forEach(num => {
+        const letra = getLetra(num);
+        sorteadosPorColuna[letra].push(num);
+      });
+
+      // Ordenar os números dentro de cada coluna para melhor visualização
+      Object.keys(sorteadosPorColuna).forEach(letra => {
+        const colunaElement = colunas[letra].element;
+        const numerosOrdenados = sorteadosPorColuna[letra].sort((a, b) => a - b);
+
+        numerosOrdenados.forEach(num => {
+          const listItem = document.createElement('li');
+
+          // Adicionar a letra e o número
+          listItem.textContent = letra + ' ' + num;
+
+          // Adicionar o destaque 'recente' se for o último sorteado
+          if (num === ultimoNumero) {
+            listItem.classList.add('recente');
+          }
+          colunaElement.appendChild(listItem);
+        });
+      });
+    }
+  </script>
+
+</body>
+
+</html>
