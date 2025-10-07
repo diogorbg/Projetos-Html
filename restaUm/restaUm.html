@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="DiogoRBG">
+  <title>Resta Um</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      background-color: #363636;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #969696;
+    }
+
+    #board-container {
+      position: relative;
+      width: 300px;
+      height: 370px;
+      background-color: #282828;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: center;
+    }
+
+    .peg {
+      width: 30px;
+      height: 30px;
+      background-color: #00897b;
+      border-radius: 50%;
+      margin: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .empty {
+      width: 30px;
+      height: 30px;
+      background-color: #363636;
+      border-radius: 50%;
+      margin: 10px;
+      cursor: pointer;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .peg.selected {
+      border-color: #22ff1e;
+      box-shadow: 0 0 10px #22ff1e;
+    }
+
+    .peg.potential-move {
+      background-color: #32cd32;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #969696;
+      font-weight: bold;
+      min-height: 25px;
+    }
+
+    #reset-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #00564d;
+      color: white;
+    }
+
+    #reset-button:hover {
+      background-color: #00897b;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Resta Um</h1>
+  <div id="board-container"></div>
+  <div id="message"></div>
+  <button id="reset-button">Reiniciar Jogo</button>
+
+  <script>
+    const board = [
+      [null, null, 1, 1, 1, null, null],
+      [null, null, 1, 1, 1, null, null],
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 0, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1],
+      [null, null, 1, 1, 1, null, null],
+      [null, null, 1, 1, 1, null, null]
+    ];
+
+    let selectedPeg = null;
+    const boardContainer = document.getElementById('board-container');
+    const messageEl = document.getElementById('message');
+    const resetButton = document.getElementById('reset-button');
+
+    function renderBoard() {
+      boardContainer.innerHTML = '';
+      board.forEach((row, rowIndex) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row';
+        row.forEach((peg, colIndex) => {
+          if (peg !== null) {
+            const pegEl = document.createElement('div');
+            pegEl.dataset.row = rowIndex;
+            pegEl.dataset.col = colIndex;
+            pegEl.classList.add(peg === 1 ? 'peg' : 'empty');
+
+            pegEl.addEventListener('click', () => handleMove(rowIndex, colIndex));
+            rowEl.appendChild(pegEl);
+          } else {
+            const emptySpace = document.createElement('div');
+            emptySpace.style.width = '30px';
+            emptySpace.style.height = '30px';
+            emptySpace.style.margin = '10px';
+            rowEl.appendChild(emptySpace);
+          }
+        });
+        boardContainer.appendChild(rowEl);
+      });
+      updateMessage();
+    }
+
+    function handleMove(row, col) {
+      const clickedPeg = board[row][col];
+      if (clickedPeg === 1) { // Clicked on a peg
+        if (selectedPeg) {
+          document.querySelector(`[data-row='${selectedPeg.row}'][data-col='${selectedPeg.col}']`).classList.remove('selected');
+        }
+        selectedPeg = { row, col };
+        document.querySelector(`[data-row='${row}'][data-col='${col}']`).classList.add('selected');
+        messageEl.textContent = 'Selecione um espaço vazio para mover.';
+      } else if (clickedPeg === 0 && selectedPeg) { // Clicked on an empty space
+        if (isValidMove(selectedPeg.row, selectedPeg.col, row, col)) {
+          makeMove(selectedPeg.row, selectedPeg.col, row, col);
+          selectedPeg = null;
+          renderBoard();
+          checkGameOver();
+        } else {
+          messageEl.textContent = 'Movimento inválido. Tente novamente.';
+        }
+      } else if (clickedPeg === 0 && !selectedPeg) {
+        messageEl.textContent = 'Primeiro, selecione uma peça para mover.';
+      }
+    }
+
+    function isValidMove(fromRow, fromCol, toRow, toCol) {
+      const dx = toCol - fromCol;
+      const dy = toRow - fromRow;
+      const dist = Math.abs(dx) + Math.abs(dy);
+
+      if (dist !== 2 || (dx !== 0 && dy !== 0)) {
+        return false; // Not a jump of length 2
+      }
+
+      const jumpedRow = fromRow + dy / 2;
+      const jumpedCol = fromCol + dx / 2;
+
+      if (board[jumpedRow] && board[jumpedRow][jumpedCol] === 1) {
+        return true;
+      }
+
+      return false;
+    }
+
+    function makeMove(fromRow, fromCol, toRow, toCol) {
+      const dx = toCol - fromCol;
+      const dy = toRow - fromRow;
+      const jumpedRow = fromRow + dy / 2;
+      const jumpedCol = fromCol + dx / 2;
+
+      board[fromRow][fromCol] = 0;
+      board[toRow][toCol] = 1;
+      board[jumpedRow][jumpedCol] = 0;
+    }
+
+    function hasPossibleMoves() {
+      for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 7; c++) {
+          if (board[r][c] === 1) { // Found a peg
+            // Check all four directions
+            if (isValidMove(r, c, r + 2, c) || // Down
+              isValidMove(r, c, r - 2, c) || // Up
+              isValidMove(r, c, r, c + 2) || // Right
+              isValidMove(r, c, r, c - 2)) { // Left
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function getPegCount() {
+      let count = 0;
+      board.forEach(row => {
+        row.forEach(peg => {
+          if (peg === 1) count++;
+        });
+      });
+      return count;
+    }
+
+    function checkGameOver() {
+      if (!hasPossibleMoves()) {
+        const pegCount = getPegCount();
+        if (pegCount === 1) {
+          messageEl.textContent = 'Parabéns! Você ganhou! Restou apenas uma peça.';
+        } else {
+          messageEl.textContent = `Fim de jogo! Restaram ${pegCount} peças. Tente novamente!`;
+        }
+      }
+    }
+
+    function updateMessage() {
+      if (!selectedPeg && !hasPossibleMoves()) {
+        checkGameOver();
+      } else if (!selectedPeg) {
+        messageEl.textContent = 'Selecione uma peça para começar a jogar.';
+      }
+    }
+
+    function resetGame() {
+      selectedPeg = null;
+      const initialBoard = [
+        [null, null, 1, 1, 1, null, null],
+        [null, null, 1, 1, 1, null, null],
+        [1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 0, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1],
+        [null, null, 1, 1, 1, null, null],
+        [null, null, 1, 1, 1, null, null]
+      ];
+      for (let i = 0; i < initialBoard.length; i++) {
+        for (let j = 0; j < initialBoard[i].length; j++) {
+          board[i][j] = initialBoard[i][j];
+        }
+      }
+      renderBoard();
+    }
+
+    resetButton.addEventListener('click', resetGame);
+
+    renderBoard();
+  </script>
+</body>
+
+</html>
