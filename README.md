@@ -1,12 +1,12 @@
-# Projetos Html #
-Quando me surge uma ideia e a implementação parece ser tão simples que pode ser feita em Html no mesmo dia. Então surge um projeto.
-Não é um requisito, mas cada html é totalmente funcional localmente e offline.
+# Projetos Rápidos #
+Quando surge aquela ideia cuja implementação parece tão simples que dá para fazer em HTML no mesmo dia, é aí que nasce um projeto!
+Não é um requisito, mas garanto: cada projeto é totalmente funcional localmente e offline.
 
 ## Bingo ##
-Imagine que você vai organizar um bingo. O quão incrível seria exibir todos os resultados em um telão? Eis que tenho uma solução.
-Abra o arquivo bingo.html no seu navegador e com [F11] deixe em tela cheia.
+Imagine que você vai organizar um bingo. Que tal exibir os resultados em um telão de forma incrível? Eu tenho a solução!
+Basta abrir o bingo.html no seu navegador e usar [F11] para colocar em tela cheia.
 ![Bingo](bingo/bingo.png)
 
 ## Resta Um ##
-Agora me deu saudades de jogar um jogo chamado resta um. É bem simples: Você deve comer as peças, assim como é feito em damas, mas apenas na vertical e horizontal. Devem existir milhões de aplicativos deste jogo, mas este eu garanto que não tem propagandas e micro transações.
+Bateu uma saudade de jogar Resta Um! As regras são simples: você deve "comer" as peças — como no jogo de Damas, mas apenas na vertical e horizontal — até sobrar uma. Deve haver milhões de aplicativos por aí, mas eu garanto que este não tem propagandas nem microtransações!
 ![Resta Um](restaUm/restaUm.png)
