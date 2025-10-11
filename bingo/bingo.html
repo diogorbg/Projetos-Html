@@ -19,7 +19,7 @@
       font-family: Arial, sans-serif;
       background-color: #f4f4f9;
       color: #333;
-      margin: 0;
+      /* margin: 0; */
       padding: 0;
       text-align: center;
     }
@@ -75,7 +75,7 @@
 
     /* --- Interface de Marcação (Botões BINGO) --- */
     #number-picker {
-      padding: 20px;
+      /* padding: 20px; */
       background-color: #fff;
       margin: 20px 0;
       border-top: 1px solid #ccc;
@@ -156,6 +156,69 @@
     #reset-button:hover {
       background-color: #990000;
     }
+
+    /* ======================================================= */
+    /* Media Query para Responsividade em Celulares (Colunas)  */
+    /* ======================================================= */
+
+    /* Aplica-se a telas de até 768px (smartphones e tablets pequenos) */
+    @media (max-width: 768px) {
+
+      .bingo-row-line {
+        padding-bottom: 4px;
+        margin-bottom: 4px;
+        border-bottom: 2px solid #004d99;
+      }
+
+      /* Ajuste do Painel de Destaque (Reduzir o tamanho dos números para caber) */
+      #last-number {
+        font-size: 6em;
+      }
+
+      #second-last,
+      #third-last {
+        font-size: 3em;
+        gap: 20px;
+      }
+
+      #fourth-last {
+        display: none;
+      }
+
+      /* --- Otimização dos Botões para Celular --- */
+
+      /* Aumenta a largura da grid para telas menores para usar todo o espaço */
+      #bingo-grid {
+        width: 98%;
+        max-width: none;
+        padding: 5px;
+      }
+
+      /* Força a quebra dos botões para que a linha BINGO fique em várias colunas */
+      .number-buttons {
+        /* Mantém o display flex */
+        gap: 2px;
+        /* Reduz o espaçamento entre os botões */
+        /* justify-content: space-between; */
+        /* Distribui os botões uniformemente */
+      }
+
+      /* Ajusta o tamanho e fonte dos botões para que caibam mais em uma linha pequena */
+      .number-buttons button {
+        font-size: 1.2em;
+        /* Reduz o tamanho da fonte */
+        width: 48px;
+        height: 48px;
+        border-radius: 24px;
+      }
+
+      /* Reduz a largura da letra BINGO */
+      .bingo-letter {
+        font-size: 1.5em;
+        width: 25px;
+        margin-right: 5px;
+      }
+    }
   </style>
 </head>
 
@@ -184,19 +247,19 @@
     <div id="number-picker">
       <h2>Números Sorteados</h2>
       <div id="bingo-grid">
-        <div class="bingo-row">
+        <div class="bingo-row bingo-row-line">
           <div class="bingo-letter">B</div>
           <div id="row-B" class="number-buttons"></div>
         </div>
-        <div class="bingo-row">
+        <div class="bingo-row bingo-row-line">
           <div class="bingo-letter">I</div>
           <div id="row-I" class="number-buttons"></div>
         </div>
-        <div class="bingo-row">
+        <div class="bingo-row bingo-row-line">
           <div class="bingo-letter">N</div>
           <div id="row-N" class="number-buttons"></div>
         </div>
-        <div class="bingo-row">
+        <div class="bingo-row bingo-row-line">
           <div class="bingo-letter">G</div>
           <div id="row-G" class="number-buttons"></div>
         </div>
