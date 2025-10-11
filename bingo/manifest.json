@@ -1,0 +1,21 @@
+{
+  "name": "Bingo da Família",
+  "short_name": "Bingo",
+  "description": "Interface automatizada para o Bingo da Família.",
+  "start_url": "./bingo.html",
+  "display": "standalone",
+  "background_color": "#ffcc00",
+  "theme_color": "#004d99",
+  "icons": [
+    {
+      "src": "icon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
