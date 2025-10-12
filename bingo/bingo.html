@@ -164,6 +164,32 @@
     /* Aplica-se a telas de até 768px (smartphones e tablets pequenos) */
     @media (max-width: 768px) {
 
+      body {
+        padding-top: 160px;
+      }
+
+      #display-area {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
+        background-color: #004d99;
+        border-radius: 0px 0px 16px 16px;
+      }
+
+      #last-number-box {
+        background-color: none;
+        padding: 0px;
+        padding-bottom: 10px;
+        margin: 0px;
+        border-radius: none;
+        box-shadow: none;
+        width: 100%;
+        max-width: none;
+      }
+
       .bingo-row-line {
         padding-bottom: 4px;
         margin-bottom: 4px;
