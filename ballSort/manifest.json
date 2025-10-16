@@ -1,0 +1,21 @@
+{
+  "name": "Ball Sort Puzzle",
+  "short_name": "Ball Sort",
+  "description": "Ball Sort sem propagandas.",
+  "start_url": "./ballSort.html",
+  "display": "standalone",
+  "background_color": "#ecf0f1",
+  "theme_color": "#ecf0f1",
+  "icons": [
+    {
+      "src": "icon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

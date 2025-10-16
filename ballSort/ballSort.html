@@ -1,356 +1,387 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ball Sort Puzzle PWA</title>
-    <meta name="theme-color" content="#4A90E2">
-    <link rel="apple-touch-icon" href="icon-192.png"> <style>
-        /* ================================================= */
-        /* === CSS do Jogo === */
-        /* ================================================= */
-        :root {
-            --ball-size: 32px;
-            --tube-height: calc(var(--ball-size) * 4 + 10px);
-            --tube-width: calc(var(--ball-size) + 10px);
-            --color-1: #e74c3c; /* Vermelho */
-            --color-2: #3498db; /* Azul */
-            --color-3: #2ecc71; /* Verde */
-            --color-4: #f1c40f; /* Amarelo */
-            --color-5: #9b59b6; /* Roxo */
-            --color-6: #e67e22; /* Laranja */
-            --bg-color: #ecf0f1;
-            --tube-color: #bdc3c7;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ball Sort Puzzle</title>
 
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: var(--bg-color);
-            transition: background-color 0.3s;
-        }
+  <link rel="manifest" href="./manifest.json">
 
-        #game-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            padding: 20px;
-            max-width: 90%;
-            margin-top: 20px;
-        }
+  <meta name="theme-color" content="#ecf0f1">
+  <link rel="apple-touch-icon" href="icon192.png">
+  <style>
+    /* ================================================= */
+    /* === CSS do Jogo === */
+    /* ================================================= */
+    :root {
+      --ball-size: 32px;
+      --tube-height: calc(var(--ball-size) * 4 + 10px);
+      --tube-width: calc(var(--ball-size) + 10px);
+      --color-1: #e74c3c;
+      /* Vermelho */
+      --color-2: #3498db;
+      /* Azul */
+      --color-3: #2ecc71;
+      /* Verde */
+      --color-4: #f1c40f;
+      /* Amarelo */
+      --color-5: #9b59b6;
+      /* Roxo */
+      --color-6: #e67e22;
+      /* Laranja */
+      --bg-color: #ecf0f1;
+      --tube-color: #bdc3c7;
+    }
 
-        .tube {
-            width: var(--tube-width);
-            height: var(--tube-height);
-            border: 3px solid var(--tube-color);
-            border-top: none;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-            position: relative;
-            display: flex;
-            flex-direction: column-reverse;
-            padding-bottom: 5px;
-            transition: transform 0.1s ease-out;
-            cursor: pointer;
-        }
-        
-        .tube:hover {
-            transform: translateY(-2px);
-        }
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: var(--bg-color);
+      transition: background-color 0.3s;
+    }
 
-        .tube.selected {
-            border-color: #2c3e50;
-            transform: translateY(-5px);
-        }
-        
-        .tube.completed {
-            border-color: #27ae60;
-        }
+    #game-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      padding: 20px;
+      max-width: 90%;
+      margin-top: 20px;
+    }
 
-        .ball {
-            width: var(--ball-size);
-            height: var(--ball-size);
-            border-radius: 50%;
-            margin: 1px auto;
-            position: relative;
-            transition: transform 0.3s ease, background-color 0.3s;
-        }
+    .tube {
+      width: var(--tube-width);
+      height: var(--tube-height);
+      border: 3px solid var(--tube-color);
+      border-top: none;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column-reverse;
+      padding-bottom: 5px;
+      transition: transform 0.1s ease-out;
+      cursor: pointer;
+    }
 
-        /* Cores das Bolas */
-        .color-1 { background-color: var(--color-1); }
-        .color-2 { background-color: var(--color-2); }
-        .color-3 { background-color: var(--color-3); }
-        .color-4 { background-color: var(--color-4); }
-        .color-5 { background-color: var(--color-5); }
-        .color-6 { background-color: var(--color-6); }
-        /* Adicione mais se precisar de mais níveis */
+    .tube:hover {
+      transform: translateY(-2px);
+    }
 
-        #message {
-            margin-top: 20px;
-            margin-left: 16px;
-            margin-right: 16px;
-            font-size: 1.5em;
-            color: #2c3e50;
-            height: 60px;
-        }
+    .tube.selected {
+      border-color: #2c3e50;
+      transform: translateY(-5px);
+    }
 
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            margin-top: 20px;
-            background-color: #4A90E2;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.2s;
-        }
+    .tube.completed {
+      border-color: #27ae60;
+    }
 
-        button:hover {
-            background-color: #357ABD;
-        }
+    .ball {
+      width: var(--ball-size);
+      height: var(--ball-size);
+      border-radius: 50%;
+      margin: 1px auto;
+      position: relative;
+      transition: transform 0.3s ease, background-color 0.3s;
+    }
 
-        /* Animação de movimento (opcional) */
-        .moving-ball {
-            position: absolute;
-            z-index: 100;
-            transition: all 0.5s ease-in-out;
-        }
-    </style>
+    /* Cores das Bolas */
+    .color-1 {
+      background-color: var(--color-1);
+    }
+
+    .color-2 {
+      background-color: var(--color-2);
+    }
+
+    .color-3 {
+      background-color: var(--color-3);
+    }
+
+    .color-4 {
+      background-color: var(--color-4);
+    }
+
+    .color-5 {
+      background-color: var(--color-5);
+    }
+
+    .color-6 {
+      background-color: var(--color-6);
+    }
+
+    /* Adicione mais se precisar de mais níveis */
+
+    #message {
+      margin-top: 20px;
+      margin-left: 16px;
+      margin-right: 16px;
+      font-size: 1.5em;
+      color: #2c3e50;
+      height: 60px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      margin-top: 20px;
+      background-color: #4A90E2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #357ABD;
+    }
+
+    /* Animação de movimento (opcional) */
+    .moving-ball {
+      position: absolute;
+      z-index: 100;
+      transition: all 0.5s ease-in-out;
+    }
+  </style>
 </head>
+
 <body>
 
-    <h1>Ball Sort Puzzle</h1>
-    <div id="game-container">
-        </div>
-    <div id="message">Clique em um tubo para selecionar a bola de cima.</div>
-    <button onclick="newGame()">Novo Jogo</button>
-    
-    <script>
-        // Este código tentaria registrar um Service Worker para offline/instalação
-        // Para que funcione, você precisaria criar os arquivos `manifest.json` e `service-worker.js`
-        // e este arquivo HTML precisaria estar em um servidor (mesmo que local)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('Service Worker registrado com sucesso:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('Falha no registro do Service Worker:', error);
-                    });
-            });
+  <h1>Ball Sort Puzzle</h1>
+  <div id="game-container">
+  </div>
+  <div id="message">Clique em um tubo para selecionar a bola de cima.</div>
+  <button onclick="newGame()">Novo Jogo</button>
+
+  <script>
+    // Este código tentaria registrar um Service Worker para offline/instalação
+    // Para que funcione, você precisaria criar os arquivos `manifest.json` e `service-worker.js`
+    // e este arquivo HTML precisaria estar em um servidor (mesmo que local)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registrado com sucesso:', registration.scope);
+          })
+          .catch(error => {
+            console.log('Falha no registro do Service Worker:', error);
+          });
+      });
+    }
+  </script>
+
+  <script>
+    /* ================================================= */
+    /* === JavaScript do Jogo === */
+    /* ================================================= */
+
+    const COLORS = [
+      'color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6'
+    ];
+    const TUBE_CAPACITY = 4;
+    let tubes = [];
+    let selectedTubeIndex = -1;
+    const numColors = 4; // Número de cores (e tubos cheios)
+    const numEmptyTubes = 2; // Número de tubos vazios adicionais
+
+    const container = document.getElementById('game-container');
+    const messageDisplay = document.getElementById('message');
+
+    /**
+     * Inicializa o estado do jogo e o HTML.
+     */
+    function initializeGame() {
+      tubes = [];
+      selectedTubeIndex = -1;
+      container.innerHTML = '';
+      messageDisplay.textContent = 'Clique em um tubo para selecionar a bola de cima.';
+
+      // 1. Gerar o estado inicial (embaralhado e solucionável)
+      const initialState = generateSolvablePuzzle(numColors, numEmptyTubes, TUBE_CAPACITY);
+      tubes = initialState;
+
+      // 2. Renderizar o HTML
+      renderGame();
+    }
+
+    /**
+     * Gera um novo jogo solucionável.
+     */
+    function generateSolvablePuzzle(numColors, numEmpty, capacity) {
+      let allBalls = [];
+      for (let i = 0; i < numColors; i++) {
+        for (let j = 0; j < capacity; j++) {
+          allBalls.push(i);
         }
-    </script>
+      }
 
-    <script>
-        /* ================================================= */
-        /* === JavaScript do Jogo === */
-        /* ================================================= */
+      // Embaralha as bolas
+      for (let i = allBalls.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allBalls[i], allBalls[j]] = [allBalls[j], allBalls[i]];
+      }
 
-        const COLORS = [
-            'color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6'
-        ];
-        const TUBE_CAPACITY = 4;
-        let tubes = [];
-        let selectedTubeIndex = -1;
-        const numColors = 4; // Número de cores (e tubos cheios)
-        const numEmptyTubes = 2; // Número de tubos vazios adicionais
+      // Cria os tubos
+      const newTubes = [];
+      for (let i = 0; i < numColors; i++) {
+        newTubes.push(allBalls.splice(0, capacity));
+      }
+      // Adiciona tubos vazios
+      for (let i = 0; i < numEmpty; i++) {
+        newTubes.push([]);
+      }
 
-        const container = document.getElementById('game-container');
-        const messageDisplay = document.getElementById('message');
+      return newTubes;
+    }
 
-        /**
-         * Inicializa o estado do jogo e o HTML.
-         */
-        function initializeGame() {
-            tubes = [];
-            selectedTubeIndex = -1;
-            container.innerHTML = '';
-            messageDisplay.textContent = 'Clique em um tubo para selecionar a bola de cima.';
-            
-            // 1. Gerar o estado inicial (embaralhado e solucionável)
-            const initialState = generateSolvablePuzzle(numColors, numEmptyTubes, TUBE_CAPACITY);
-            tubes = initialState;
-            
-            // 2. Renderizar o HTML
-            renderGame();
-        }
+    /**
+     * Renderiza o estado atual do jogo no HTML.
+     */
+    function renderGame() {
+      container.innerHTML = '';
+      tubes.forEach((tubeBalls, tubeIndex) => {
+        const tubeDiv = document.createElement('div');
+        tubeDiv.className = 'tube';
+        tubeDiv.dataset.index = tubeIndex;
+        tubeDiv.onclick = () => handleTubeClick(tubeIndex);
 
-        /**
-         * Gera um novo jogo solucionável.
-         */
-        function generateSolvablePuzzle(numColors, numEmpty, capacity) {
-            let allBalls = [];
-            for (let i = 0; i < numColors; i++) {
-                for (let j = 0; j < capacity; j++) {
-                    allBalls.push(i);
-                }
-            }
-            
-            // Embaralha as bolas
-            for (let i = allBalls.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [allBalls[i], allBalls[j]] = [allBalls[j], allBalls[i]];
-            }
-
-            // Cria os tubos
-            const newTubes = [];
-            for (let i = 0; i < numColors; i++) {
-                newTubes.push(allBalls.splice(0, capacity));
-            }
-            // Adiciona tubos vazios
-            for (let i = 0; i < numEmpty; i++) {
-                newTubes.push([]);
-            }
-
-            return newTubes;
-        }
-
-        /**
-         * Renderiza o estado atual do jogo no HTML.
-         */
-        function renderGame() {
-            container.innerHTML = '';
-            tubes.forEach((tubeBalls, tubeIndex) => {
-                const tubeDiv = document.createElement('div');
-                tubeDiv.className = 'tube';
-                tubeDiv.dataset.index = tubeIndex;
-                tubeDiv.onclick = () => handleTubeClick(tubeIndex);
-
-                // Adiciona classe de seleção
-                if (tubeIndex === selectedTubeIndex) {
-                    tubeDiv.classList.add('selected');
-                } else {
-                    tubeDiv.classList.remove('selected');
-                }
-                
-                // Verifica e adiciona classe de tubo completo
-                if (isTubeCompleted(tubeBalls)) {
-                    tubeDiv.classList.add('completed');
-                } else {
-                    tubeDiv.classList.remove('completed');
-                }
-
-                tubeBalls.forEach(colorIndex => {
-                    const ballDiv = document.createElement('div');
-                    ballDiv.className = `ball ${COLORS[colorIndex]}`;
-                    tubeDiv.appendChild(ballDiv);
-                });
-
-                container.appendChild(tubeDiv);
-            });
-
-            checkWinCondition();
-        }
-        
-        /**
-         * Função principal de clique no tubo.
-         */
-        function handleTubeClick(clickedIndex) {
-            if (selectedTubeIndex === -1) {
-                // 1. Selecionar Tubo de Origem
-                if (tubes[clickedIndex].length > 0 && !isTubeCompleted(tubes[clickedIndex])) {
-                    selectedTubeIndex = clickedIndex;
-                    messageDisplay.textContent = `Tubo ${clickedIndex + 1} selecionado. Clique no tubo de destino.`;
-                } else {
-                    messageDisplay.textContent = 'Este tubo não pode ser selecionado (vazio ou já completo).';
-                }
-            } else {
-                // 2. Tentar Mover para o Tubo de Destino
-                if (clickedIndex === selectedTubeIndex) {
-                    // Deselecionar
-                    selectedTubeIndex = -1;
-                    messageDisplay.textContent = 'Seleção cancelada. Clique em um tubo para selecionar.';
-                } else if (isValidMove(selectedTubeIndex, clickedIndex)) {
-                    moveBall(selectedTubeIndex, clickedIndex);
-                    selectedTubeIndex = -1; // Movimento feito
-                } else {
-                    messageDisplay.textContent = 'Movimento inválido. Tente novamente.';
-                    // Opcional: manter o tubo selecionado ou deselecionar
-                    selectedTubeIndex = -1; 
-                }
-            }
-            renderGame(); // Atualiza o visual
-        }
-        
-        /**
-         * Verifica se a jogada é válida.
-         */
-        function isValidMove(fromIndex, toIndex) {
-            const fromTube = tubes[fromIndex];
-            const toTube = tubes[toIndex];
-            
-            // O tubo de origem não pode estar vazio
-            if (fromTube.length === 0) return false;
-            
-            // O tubo de destino não pode estar cheio
-            if (toTube.length >= TUBE_CAPACITY) return false;
-            
-            const topBallColor = fromTube[fromTube.length - 1];
-            
-            // Se o tubo de destino estiver vazio, qualquer bola pode ir para lá.
-            if (toTube.length === 0) return true;
-            
-            // Se o tubo de destino não estiver vazio, a bola de cima deve ter a mesma cor.
-            const targetTopBallColor = toTube[toTube.length - 1];
-            return topBallColor === targetTopBallColor;
+        // Adiciona classe de seleção
+        if (tubeIndex === selectedTubeIndex) {
+          tubeDiv.classList.add('selected');
+        } else {
+          tubeDiv.classList.remove('selected');
         }
 
-        /**
-         * Executa o movimento da bola.
-         */
-        function moveBall(fromIndex, toIndex) {
-            const ballColor = tubes[fromIndex].pop();
-            tubes[toIndex].push(ballColor);
-            messageDisplay.textContent = `Bola movida de ${fromIndex + 1} para ${toIndex + 1}.`;
+        // Verifica e adiciona classe de tubo completo
+        if (isTubeCompleted(tubeBalls)) {
+          tubeDiv.classList.add('completed');
+        } else {
+          tubeDiv.classList.remove('completed');
         }
 
-        /**
-         * Verifica se um tubo está completo (4 bolas da mesma cor).
-         */
-        function isTubeCompleted(tube) {
-            if (tube.length !== TUBE_CAPACITY) return false;
-            const firstColor = tube[0];
-            return tube.every(ballColor => ballColor === firstColor);
-        }
+        tubeBalls.forEach(colorIndex => {
+          const ballDiv = document.createElement('div');
+          ballDiv.className = `ball ${COLORS[colorIndex]}`;
+          tubeDiv.appendChild(ballDiv);
+        });
 
-        /**
-         * Verifica a condição de vitória do jogo.
-         */
-        function checkWinCondition() {
-            // Conta quantos tubos estão completos ou vazios
-            const solvedTubes = tubes.filter(tube => 
-                tube.length === 0 || isTubeCompleted(tube)
-            );
+        container.appendChild(tubeDiv);
+      });
 
-            // A vitória ocorre quando todos os tubos estão completos ou vazios.
-            if (solvedTubes.length === tubes.length) {
-                // E há pelo menos 'numColors' tubos COMPLETOs (para evitar vitória imediata)
-                const completedCount = tubes.filter(isTubeCompleted).length;
-                if (completedCount === numColors) {
-                    messageDisplay.textContent = 'PARABÉNS! Você Venceu!';
-                    // Desabilita a interação após a vitória
-                    container.querySelectorAll('.tube').forEach(t => t.onclick = null);
-                }
-            }
-        }
-        
-        /**
-         * Inicia um novo jogo.
-         */
-        function newGame() {
-            initializeGame();
-        }
+      checkWinCondition();
+    }
 
-        // Inicia o jogo quando o script é carregado
-        newGame();
-    </script>
+    /**
+     * Função principal de clique no tubo.
+     */
+    function handleTubeClick(clickedIndex) {
+      if (selectedTubeIndex === -1) {
+        // 1. Selecionar Tubo de Origem
+        if (tubes[clickedIndex].length > 0 && !isTubeCompleted(tubes[clickedIndex])) {
+          selectedTubeIndex = clickedIndex;
+          messageDisplay.textContent = `Tubo ${clickedIndex + 1} selecionado. Clique no tubo de destino.`;
+        } else {
+          messageDisplay.textContent = 'Este tubo não pode ser selecionado (vazio ou já completo).';
+        }
+      } else {
+        // 2. Tentar Mover para o Tubo de Destino
+        if (clickedIndex === selectedTubeIndex) {
+          // Deselecionar
+          selectedTubeIndex = -1;
+          messageDisplay.textContent = 'Seleção cancelada. Clique em um tubo para selecionar.';
+        } else if (isValidMove(selectedTubeIndex, clickedIndex)) {
+          moveBall(selectedTubeIndex, clickedIndex);
+          selectedTubeIndex = -1; // Movimento feito
+        } else {
+          messageDisplay.textContent = 'Movimento inválido. Tente novamente.';
+          // Opcional: manter o tubo selecionado ou deselecionar
+          selectedTubeIndex = -1;
+        }
+      }
+      renderGame(); // Atualiza o visual
+    }
+
+    /**
+     * Verifica se a jogada é válida.
+     */
+    function isValidMove(fromIndex, toIndex) {
+      const fromTube = tubes[fromIndex];
+      const toTube = tubes[toIndex];
+
+      // O tubo de origem não pode estar vazio
+      if (fromTube.length === 0) return false;
+
+      // O tubo de destino não pode estar cheio
+      if (toTube.length >= TUBE_CAPACITY) return false;
+
+      const topBallColor = fromTube[fromTube.length - 1];
+
+      // Se o tubo de destino estiver vazio, qualquer bola pode ir para lá.
+      if (toTube.length === 0) return true;
+
+      // Se o tubo de destino não estiver vazio, a bola de cima deve ter a mesma cor.
+      const targetTopBallColor = toTube[toTube.length - 1];
+      return topBallColor === targetTopBallColor;
+    }
+
+    /**
+     * Executa o movimento da bola.
+     */
+    function moveBall(fromIndex, toIndex) {
+      const ballColor = tubes[fromIndex].pop();
+      tubes[toIndex].push(ballColor);
+      messageDisplay.textContent = `Bola movida de ${fromIndex + 1} para ${toIndex + 1}.`;
+    }
+
+    /**
+     * Verifica se um tubo está completo (4 bolas da mesma cor).
+     */
+    function isTubeCompleted(tube) {
+      if (tube.length !== TUBE_CAPACITY) return false;
+      const firstColor = tube[0];
+      return tube.every(ballColor => ballColor === firstColor);
+    }
+
+    /**
+     * Verifica a condição de vitória do jogo.
+     */
+    function checkWinCondition() {
+      // Conta quantos tubos estão completos ou vazios
+      const solvedTubes = tubes.filter(tube =>
+        tube.length === 0 || isTubeCompleted(tube)
+      );
+
+      // A vitória ocorre quando todos os tubos estão completos ou vazios.
+      if (solvedTubes.length === tubes.length) {
+        // E há pelo menos 'numColors' tubos COMPLETOs (para evitar vitória imediata)
+        const completedCount = tubes.filter(isTubeCompleted).length;
+        if (completedCount === numColors) {
+          messageDisplay.textContent = 'PARABÉNS! Você Venceu!';
+          // Desabilita a interação após a vitória
+          container.querySelectorAll('.tube').forEach(t => t.onclick = null);
+        }
+      }
+    }
+
+    /**
+     * Inicia um novo jogo.
+     */
+    function newGame() {
+      initializeGame();
+    }
+
+    // Inicia o jogo quando o script é carregado
+    newGame();
+  </script>
 </body>
+
 </html>
