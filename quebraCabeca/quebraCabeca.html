@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quebra-Cabeça de Imagem Dinâmico</title>
+
+  <link rel="manifest" href="./manifest.json">
+
+  <meta name="theme-color" content="#ecf0f1">
+  <link rel="apple-touch-icon" href="icon192.png">
+  <style>
+    /* ------------------ */
+    /* CSS EMBUTIDO */
+    /* ------------------ */
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fff;
+      display: flex;
+      flex-wrap: wrap;
+      /* Permite quebras de linha em telas pequenas */
+      gap: 20px;
+      align-items: center;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      max-width: 320px;
+    }
+
+    #puzzle-container {
+      width: 400px;
+      scale: 85%;
+      /* Largura base para o contêiner do puzzle */
+      height: 400px;
+      /* Altura base para o contêiner do puzzle */
+      border: 5px solid #333;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: grid;
+      gap: 0;
+      /* O gap é definido pelo grid do JS */
+      background-color: #eee;
+    }
+
+    .piece {
+      /* Estilos básicos para a peça */
+      border: 1px solid #000;
+      box-sizing: border-box;
+      cursor: pointer;
+      background-size: 400px 400px;
+      /* O tamanho de fundo é fixo, mas a posição muda */
+    }
+
+    .piece.selected {
+      border: 3px solid gold;
+      /* Peça selecionada para troca */
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+
+    #message {
+      margin-top: 15px;
+      font-weight: bold;
+      color: green;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Opcional: Estilo da imagem de pré-visualização */
+    #preview-img {
+      max-width: 100px;
+      max-height: 100px;
+      border: 1px solid #ccc;
+      margin-left: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Quebra-Cabeça</h1>
+
+  <div class="controls">
+    <div class="control-group">
+      <label for="image-upload">1. Selecione a Imagem:</label>
+      <input type="file" id="image-upload" accept="image/*">
+    </div>
+
+    <div class="control-group">
+      <label for="parts-count">2. Partes por Lado (Ex: 3 para 3x3):</label>
+      <input type="number" id="parts-count" value="3" min="2" max="10" style="width: 50px;">
+    </div>
+
+    <button id="start-button" disabled>3. Iniciar Quebra-Cabeça</button>
+  </div>
+
+  <div id="puzzle-container">
+  </div>
+
+  <div id="message"></div>
+
+  <script>
+    // ------------------
+    // JAVASCRIPT EMBUTIDO
+    // ------------------
+    const imageUpload = document.getElementById('image-upload');
+    const partsCountInput = document.getElementById('parts-count');
+    const startButton = document.getElementById('start-button');
+    const puzzleContainer = document.getElementById('puzzle-container');
+    const messageDiv = document.getElementById('message');
+
+    let originalImage = null; // Armazenará o objeto de imagem carregado
+    let pieces = []; // Armazenará os objetos das peças (com seus IDs corretos)
+    let board = []; // Armazenará os IDs das peças na ordem atual do tabuleiro
+    let selectedPieceIndex = -1;
+    let partsPerSide = 3;
+    const CONTAINER_SIZE = 400; // Tamanho fixo do contêiner em pixels
+
+    // 1. Lidar com o Upload da Imagem
+    imageUpload.addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            originalImage = img;
+            startButton.disabled = false;
+            messageDiv.textContent = "Imagem carregada. Clique em Iniciar.";
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // 2. Lidar com o Início do Jogo
+    startButton.addEventListener('click', startGame);
+    partsCountInput.addEventListener('change', function () {
+      partsPerSide = parseInt(this.value);
+      if (originalImage) {
+        startButton.disabled = false;
+      }
+    });
+
+    function startGame() {
+      if (!originalImage) {
+        alert("Por favor, carregue uma imagem primeiro.");
+        return;
+      }
+
+      partsPerSide = parseInt(partsCountInput.value);
+      if (partsPerSide < 2 || partsPerSide > 10 || isNaN(partsPerSide)) {
+        alert("O número de partes por lado deve estar entre 2 e 10.");
+        return;
+      }
+
+      messageDiv.textContent = "Jogo iniciado! Monte o quebra-cabeça.";
+      createPieces();
+      shuffleBoard();
+      drawBoard();
+    }
+
+    // 3. Cortar a Imagem em Peças e Criar as Peças
+    function createPieces() {
+      pieces = [];
+      board = [];
+      const pieceSize = CONTAINER_SIZE / partsPerSide;
+      const imgWidth = originalImage.width;
+      const imgHeight = originalImage.height;
+      const pieceWidth = imgWidth / partsPerSide;
+      const pieceHeight = imgHeight / partsPerSide;
+
+      // Limpar o contêiner
+      puzzleContainer.innerHTML = '';
+      puzzleContainer.style.gridTemplateColumns = `repeat(${partsPerSide}, 1fr)`;
+      puzzleContainer.style.gridTemplateRows = `repeat(${partsPerSide}, 1fr)`;
+      puzzleContainer.style.width = `${CONTAINER_SIZE}px`;
+      puzzleContainer.style.height = `${CONTAINER_SIZE}px`;
+
+      for (let i = 0; i < partsPerSide * partsPerSide; i++) {
+        const row = Math.floor(i / partsPerSide);
+        const col = i % partsPerSide;
+
+        const pieceElement = document.createElement('div');
+        pieceElement.classList.add('piece');
+        pieceElement.dataset.correctId = i; // Armazena a posição correta
+        pieceElement.id = `piece-${i}`;
+
+        // Configurar o fundo para mostrar a parte correta da imagem
+        const backgroundX = -col * pieceSize;
+        const backgroundY = -row * pieceSize;
+
+        pieceElement.style.background = `url(${originalImage.src})`;
+        pieceElement.style.backgroundSize = `${CONTAINER_SIZE}px ${CONTAINER_SIZE}px`;
+        pieceElement.style.backgroundPosition = `${backgroundX}px ${backgroundY}px`;
+
+        pieces.push(pieceElement);
+        board.push(i); // Inicialmente, o board está na ordem correta
+      }
+    }
+
+    // 4. Embaralhar o Tabuleiro
+    function shuffleBoard() {
+      for (let i = board.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [board[i], board[j]] = [board[j], board[i]]; // Troca
+      }
+    }
+
+    // 5. Desenhar o Tabuleiro
+    function drawBoard() {
+      puzzleContainer.innerHTML = '';
+      board.forEach((pieceId, index) => {
+        const pieceElement = pieces[pieceId]; // Obtém a peça correta pelo ID na posição 'index'
+        // Remove a classe 'selected' de todas as peças antes de redesenhar
+        pieceElement.classList.remove('selected');
+        // Adiciona o listener de clique
+        pieceElement.onclick = () => selectPiece(index);
+        puzzleContainer.appendChild(pieceElement);
+      });
+      selectedPieceIndex = -1; // Reseta a seleção
+    }
+
+    // 6. Lidar com a Seleção e Troca de Peças
+    function selectPiece(clickedIndex) {
+      const pieceElement = puzzleContainer.children[clickedIndex];
+
+      if (selectedPieceIndex === -1) {
+        // Primeira peça selecionada
+        selectedPieceIndex = clickedIndex;
+        pieceElement.classList.add('selected');
+      } else if (selectedPieceIndex === clickedIndex) {
+        // Deselecionar
+        selectedPieceIndex = -1;
+        pieceElement.classList.remove('selected');
+      } else {
+        // Segunda peça selecionada: Trocar as posições no array 'board'
+        const firstPieceId = board[selectedPieceIndex];
+        const secondPieceId = board[clickedIndex];
+
+        board[selectedPieceIndex] = secondPieceId;
+        board[clickedIndex] = firstPieceId;
+
+        // Redesenhar o tabuleiro com a nova ordem
+        drawBoard();
+        checkWin();
+      }
+    }
+
+    // 7. Checar a Condição de Vitória
+    function checkWin() {
+      const isSolved = board.every((pieceId, index) => {
+        // O ID correto (pieceId) deve ser igual à posição atual (index)
+        return pieceId === index;
+      });
+
+      if (isSolved) {
+        messageDiv.textContent = "PARABÉNS! Quebra-Cabeça Resolvido!";
+        // Opcional: Desabilitar cliques após a vitória
+        Array.from(puzzleContainer.children).forEach(piece => piece.onclick = null);
+        startButton.disabled = false; // Permite iniciar um novo jogo
+      }
+    }
+
+  </script>
+
+</body>
+
+</html>
