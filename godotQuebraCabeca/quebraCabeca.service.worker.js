@@ -4,9 +4,9 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1761344000|1639814723';
+const CACHE_VERSION = '1761344775|2415061981';
 /** @type {string} */
-const CACHE_PREFIX = 'quebraCabeca-sw-cache-';
+const CACHE_PREFIX = 'Quebra Cabeça-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 /** @type {string} */
 const OFFLINE_URL = 'quebraCabeca.offline.html';
