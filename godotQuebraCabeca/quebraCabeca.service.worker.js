@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1761420443|7243956703';
+const CACHE_VERSION = '1761438674|15759086486';
 /** @type {string} */
 const CACHE_PREFIX = 'Quebra Cabeça-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
