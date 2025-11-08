@@ -1,3 +1,8 @@
+// import { Boot } from './src/Boot.js';
+// import { Game } from './src/Game.js';
+// import { GameOver } from './src/GameOver.js';
+// import { Preloader } from './src/Preloader.js';
+
 class BallSortGame extends Phaser.Scene {
   constructor() {
     super('BallSortGame');
@@ -8,7 +13,7 @@ class BallSortGame extends Phaser.Scene {
   }
 
   preload() {
-    const svgConfig = { width: 148, height: 148 }
+    const svgConfig = { width: 120, height: 120 }
     this.load.svg('ball_red', 'assets/ball_red.svg', svgConfig)
     this.load.svg('ball_blue', 'assets/ball_blue.svg', svgConfig)
     this.load.svg('ball_green', 'assets/ball_green.svg', svgConfig)
@@ -21,15 +26,15 @@ class BallSortGame extends Phaser.Scene {
     // Crie o ambiente do jogo
     this.cameras.main.setBackgroundColor('#333')
 
-    this.add.text(this.game.config.width / 2, 50, 'Ball Sort Puzzle', { fontSize: '40px', fill: '#fff' }).setOrigin(0.5)
+    this.add.text(this.game.config.width / 2, 100, 'Ball Sort Puzzle', { fontSize: '60px', fill: '#fff' }).setOrigin(0.5)
 
     // --- Configuração dos Tubos e Bolas ---
     const tubeCapacity = 4; // Quantas bolas cabem em cada tubo
     const numColors = 4; // Quantas cores diferentes de bolas
     const numTubes = numColors + 2; // Número de tubos (cores + 2 tubos vazios)
-    const tubeSpacing = 160; // Espaçamento horizontal entre os tubos
+    const tubeSpacing = 180; // Espaçamento horizontal entre os tubos
     const tubeStartX = (this.game.config.width - (numTubes - 1) * tubeSpacing) / 2;
-    const tubeBaseY = this.game.config.height - 100; // Posição Y da base do tubo
+    const tubeBaseY = this.game.config.height - 300; // Posição Y da base do tubo
 
     const colors = ['red', 'blue', 'green', 'yellow']; // Cores disponíveis
 
@@ -48,9 +53,7 @@ class BallSortGame extends Phaser.Scene {
 
       // Desenhar o tubo
       const tubeSprite = this.add.sprite(tubeX, tubeBaseY, 'tube').setOrigin(0.5, 1)
-      tubeSprite.setScale(0.8) // Ajuste a escala conforme necessário
       const tubeSpriteSel = this.add.sprite(tubeX, tubeBaseY, 'tubeSel').setOrigin(0.5, 1)
-      tubeSpriteSel.setScale(0.8) // Ajuste a escala conforme necessário
       tubeSpriteSel.visible = false
 
       const tube = {
@@ -67,7 +70,7 @@ class BallSortGame extends Phaser.Scene {
       if (i < numColors) {
         for (let j = 0; j < tubeCapacity; j++) {
           const color = allBalls.pop();
-          const ball = this.add.sprite(tube.x, tube.y - (j * 80 + 60), `ball_${color}`).setScale(0.5); // Ajuste pos/escala
+          const ball = this.add.sprite(tube.x, tube.y - (j * 136 + 76), `ball_${color}`)
           ball.color = color;
           // ball.tubeIndex = i;
           // ball.setInteractive(); // Torna a bola clicável
@@ -273,13 +276,18 @@ const config = {
   type: Phaser.AUTO,
   width: 1080,
   height: 1440,
+  // parent: divId,
+  // backgroundColor: '#333',
   scale: {
-    // parent: divId,
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    // zoom: 1,  // Size of game canvas = game size * zoom
   },
-  scene: [BallSortGame],
+  scene: [
+    BallSortGame,
+    // Boot,
+    // Preloader,
+    // GameOver
+  ],
   physics: {
     default: 'arcade',
     arcade: {
