@@ -20,7 +20,9 @@ class BallSortGame extends Phaser.Scene {
 
   create() {
     // Crie o ambiente do jogo
-    this.add.text(this.game.config.width / 2, 50, 'Ball Sort Puzzle', { fontSize: '40px', fill: '#fff' }).setOrigin(0.5);
+    this.cameras.main.setBackgroundColor('#333')
+
+    this.add.text(this.game.config.width / 2, 50, 'Ball Sort Puzzle', { fontSize: '40px', fill: '#fff' }).setOrigin(0.5)
 
     // --- Configuração dos Tubos e Bolas ---
     const tubeCapacity = 4; // Quantas bolas cabem em cada tubo
