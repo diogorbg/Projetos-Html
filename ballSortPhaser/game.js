@@ -193,46 +193,57 @@ class BallSortGame extends Phaser.Scene {
     // Impedir cliques durante a animação
     this.input.enabled = false;
 
-    // --- CÓDIGO CORRIGIDO AQUI ---
-    this.ballTween = this.tweens.add({
+    // --- CÓDIGO CORRIGIDO: ENCADENAMENTO DE TWEENS ---
+
+    // 1. Tween UP (Mover para cima)
+    const tweenUp = this.tweens.add({
       targets: ballToMove,
+      y: ballToMove.y - 80, // Subir até o ponto alto
+      duration: 120,
       ease: 'Power1',
-      // Duração total para todas as etapas
-      duration: 250,
-
-      // Use o array 'tweens' diretamente em 'this.tweens.add'
-      tweens: [
-        {
-          y: ballToMove.y - 100, // Sobe a bola
-        },
-        {
-          x: targetX, // Move horizontalmente para o novo tubo
-        },
-        {
-          y: targetY, // Desce a bola para a posição final
-        }
-      ],
-
       onComplete: () => {
-        // Adicionar a bola ao tubo de destino
-        targetTube.balls.push(ballToMove);
-        ballToMove.tubeIndex = this.tubes.indexOf(targetTube);
-        ballToMove.depth = 100 + targetTube.balls.length - 1; // Ajustar profundidade
+        // 2. Tween ACROSS (Mover horizontalmente)
+        const tweenAcross = this.tweens.add({
+          targets: ballToMove,
+          x: targetX, // Posição X do tubo de destino
+          duration: 250,
+          ease: 'Power1',
+          onComplete: () => {
+            // 3. Tween DOWN (Descer para a posição final)
+            this.tweens.add({
+              targets: ballToMove,
+              y: targetY, // Posição Y final
+              duration: 120,
+              ease: 'Power1',
+              onComplete: () => {
+                // *** Lógica de Conclusão do Movimento (pop/push/cleanup) ***
 
-        this.selectedTube = null;
-        this.movingBall = null;
-        this.ballTween = null;
-        this.input.enabled = true; // Habilita cliques novamente
+                // Remover a bola do tubo de origem SÓ APÓS A ANIMAÇÃO BEM SUCEDIDA
+                sourceTube.balls.pop();
 
-        console.log(`Bola ${ballToMove.color} movida de tubo ${this.tubes.indexOf(sourceTube)} para tubo ${this.tubes.indexOf(targetTube)}`);
-        this.logTubeStates();
+                // Adicionar a bola ao tubo de destino
+                targetTube.balls.push(ballToMove);
+                ballToMove.tubeIndex = this.tubes.indexOf(targetTube);
+                ballToMove.depth = 100 + targetTube.balls.length - 1;
 
-        // Verificar condição de vitória
-        if (this.checkWinCondition()) {
-          this.add.text(this.game.config.width / 2, this.game.config.height / 2, 'VOCÊ VENCEU!', { fontSize: '60px', fill: '#0f0' }).setOrigin(0.5);
-        }
+                this.selectedTube = null;
+                this.movingBall = null;
+                this.ballTween = null;
+                this.input.enabled = true; // Habilita cliques novamente
+
+                this.logTubeStates();
+
+                // Verificar condição de vitória
+                if (this.checkWinCondition()) {
+                  this.add.text(this.game.config.width / 2, this.game.config.height / 2, 'VOCÊ VENCEU!', { fontSize: '60px', fill: '#0f0' }).setOrigin(0.5);
+                }
+              }
+            });
+          }
+        });
       }
     });
+    this.ballTween = tweenUp; // Armazene a referência do primeiro Tween.
     // --- FIM DO CÓDIGO CORRIGIDO ---
   }
 
