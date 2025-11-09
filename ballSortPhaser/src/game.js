@@ -1,268 +1,290 @@
 export class Game extends Phaser.Scene {
   constructor() {
-    super('BallSortGame');
-    this.tubes = []; // Array para armazenar os objetos dos tubos
-    this.selectedTube = null; // Tubo atualmente selecionado para mover uma bola
-    this.movingBall = null; // Bola atualmente em movimento
-    this.ballTween = null; // Tween para a animação da bola
+    super('Game');
+
+    this.maxOrbsPerTube = 4;
+    this.tubeCount = 6;
+    this.orbSize = 140;
+    this.selectedTube = null;
+    this.totalOrbCount = 0;
+    this.isAnimating = false;
   }
 
   preload() {
-    const svgConfig = { width: 120, height: 120 }
-    this.load.svg('ball_red', 'assets/ball_red.svg', svgConfig)
-    this.load.svg('ball_blue', 'assets/ball_blue.svg', svgConfig)
-    this.load.svg('ball_green', 'assets/ball_green.svg', svgConfig)
-    this.load.svg('ball_yellow', 'assets/ball_yellow.svg', svgConfig)
-    this.load.svg('tube', 'assets/tubo.svg', { width: 168, height: 600 })
-    this.load.svg('tubeSel', 'assets/tubo_sel.svg', { width: 168, height: 600 })
+    const confSvg = { width: 120, height: 120 }
+    this.load.setPath('assets');
+    this.load.svg('yellow_circle', 'ball_yellow.svg', confSvg)
+    this.load.svg('purple_circle', 'ball_green.svg', confSvg)
+    this.load.svg('tube', 'tubo.svg', { width: 168, height: 600 })
   }
 
   create() {
-    // Crie o ambiente do jogo
-    this.cameras.main.setBackgroundColor('#333')
+    // this.cameras.main.setBackgroundColor(0x2ecc71);
 
-    this.add.text(this.game.config.width / 2, 100, 'Ball Sort Puzzle', { fontSize: '60px', fill: '#fff' }).setOrigin(0.5)
+    // Create instructions text
+    this.add.text(540, 1200, 'Sort the colors into separate tubes!', {
+      fontFamily: 'Arial Black', fontSize: 28, color: '#ffffff',
+      stroke: '#000000', strokeThickness: 8,
+      align: 'center'
+    }).setOrigin(0.5);
 
-    // --- Configuração dos Tubos e Bolas ---
-    const tubeCapacity = 4; // Quantas bolas cabem em cada tubo
-    const numColors = 4; // Quantas cores diferentes de bolas
-    const numTubes = numColors + 2; // Número de tubos (cores + 2 tubos vazios)
-    const tubeSpacing = 180; // Espaçamento horizontal entre os tubos
-    const tubeStartX = (this.game.config.width - (numTubes - 1) * tubeSpacing) / 2;
-    const tubeBaseY = this.game.config.height - 300; // Posição Y da base do tubo
+    // Create win text (hidden initially)
+    this.winText = this.add.text(540, 100, 'YOU WIN!', {
+      fontFamily: 'Arial Black', fontSize: 48, color: '#ffff00',
+      stroke: '#000000', strokeThickness: 8,
+      align: 'center'
+    }).setOrigin(0.5).setVisible(false);
 
-    const colors = ['red', 'blue', 'green', 'yellow']; // Cores disponíveis
+    this.tubes = [];
+    this.createTubes();
 
-    // Gerar e embaralhar as bolas
-    let allBalls = [];
-    for (let i = 0; i < numColors; i++) {
-      for (let j = 0; j < tubeCapacity; j++) {
-        allBalls.push(colors[i]);
-      }
-    }
-    Phaser.Utils.Array.Shuffle(allBalls);
+    this.setupOrbs();
+  }
 
-    // Criar os tubos e preenchê-los
-    for (let i = 0; i < numTubes; i++) {
-      const tubeX = tubeStartX + i * tubeSpacing;
+  createTubes() {
+    const centerX = this.cameras.main.width / 2;
+    const tubeSpacing = 178;
+    const startX = centerX - ((this.tubeCount - 1) * tubeSpacing / 2);
+    const tubeY = 700;
 
-      // Desenhar o tubo
-      const tubeSprite = this.add.sprite(tubeX, tubeBaseY, 'tube').setOrigin(0.5, 1)
-      const tubeSpriteSel = this.add.sprite(tubeX, tubeBaseY, 'tubeSel').setOrigin(0.5, 1)
-      tubeSpriteSel.visible = false
+    for (let i = 0; i < this.tubeCount; i++) {
+      const tube = this.add.container(startX + i * tubeSpacing, tubeY);
 
-      const tube = {
-        x: tubeX,
-        y: tubeBaseY,
-        balls: [], // Bolas neste tubo
-        container: tubeSprite, // Referência ao sprite do tubo
-        containerSel: tubeSpriteSel,
-        capacity: tubeCapacity
-      };
+      const tubeImage = this.add.image(0, -50, 'tube');
+      // tubeImage.setScale(0.5);
+      tube.add(tubeImage);
+
+      tubeImage.setInteractive();
+      tubeImage.on('pointerdown', () => this.onTubeClick(i));
+
+      // Initialize tube contents array (bottom to top)
+      tube.contents = [];
+
       this.tubes.push(tube);
-
-      // Preencher os primeiros 'numColors' tubos com bolas embaralhadas
-      if (i < numColors) {
-        for (let j = 0; j < tubeCapacity; j++) {
-          const color = allBalls.pop();
-          const ball = this.add.sprite(tube.x, tube.y - (j * 136 + 76), `ball_${color}`)
-          ball.color = color;
-          // ball.tubeIndex = i;
-          // ball.setInteractive(); // Torna a bola clicável
-          ball.depth = 100 + j; // Garante que bolas de cima fiquem sobre as de baixo
-          tube.balls.push(ball);
-        }
-      }
-
-      // Adicionar interatividade ao sprite do tubo (para cliques)
-      tube.container.setInteractive();
-      tube.container.tubeIndex = i; // Armazena o índice do tubo
-      tube.container.on('pointerdown', () => this.handleTubeClick(i));
     }
-
-    // --- Debug: Exibir o estado inicial
-    this.logTubeStates();
-
-    // --- Eventos de Input ---
-    // this.input.on('pointerdown', (pointer, gameObjects) => {
-    //   if (gameObjects.length > 0 && gameObjects[0].tubeIndex !== undefined) {
-    //     this.handleTubeClick(gameObjects[0].tubeIndex);
-    //   }
-    // });
   }
 
-  // Função auxiliar para obter a bola do topo de um tubo
-  getTopBall(tubeIndex) {
+  setupOrbs() {
+    // First tube: 2 purple at bottom, 2 yellow on top
+    this.addOrbToTube(0, 'purple_circle');
+    this.addOrbToTube(0, 'purple_circle');
+    this.addOrbToTube(0, 'yellow_circle');
+    this.addOrbToTube(0, 'yellow_circle');
+
+    // Second tube: 2 yellow at bottom, 2 purple on top
+    this.addOrbToTube(1, 'yellow_circle');
+    this.addOrbToTube(1, 'yellow_circle');
+    this.addOrbToTube(1, 'purple_circle');
+    this.addOrbToTube(1, 'purple_circle');
+
+    // Third tube is empty
+  }
+
+  addOrbToTube(tubeIndex, orbType) {
     const tube = this.tubes[tubeIndex];
-    if (tube && tube.balls.length > 0) {
-      return tube.balls[tube.balls.length - 1];
-    }
-    return null;
-  }
 
-  // Função auxiliar para obter a próxima posição Y para uma bola em um tubo
-  getNextBallY(tubeIndex) {
-    const tube = this.tubes[tubeIndex];
-    const numBalls = tube.balls.length;
-    // Altura de uma bola ~ 40 * scale (0.5) = 20. Adicionar um offset de base.
-    return tube.y - (numBalls * 136 + 76); // Ajuste a posição Y para a próxima bola
-  }
-
-  // Lógica para lidar com o clique em um tubo
-  handleTubeClick(tubeIndex) {
-    console.log(tubeIndex)
-    const clickedTube = this.tubes[tubeIndex]
-
-    if (this.movingBall) {
-      // Não faça nada se uma bola já estiver se movendo
-      // return;
-    }
-
-    if (this.selectedTube === null) {
-      // 1. NENHUM TUBO SELECIONADO: Selecionar um tubo para pegar uma bola
-      const topBall = this.getTopBall(tubeIndex)
-      if (topBall) {
-        this.selectedTube = tubeIndex
-        clickedTube.containerSel.visible = true
-        topBall.y -= 20 // Leve a bola um pouco para cima para indicar seleção
-        this.movingBall = topBall // Marcar a bola como "em seleção"
-        console.log(`Tubo ${tubeIndex} selecionado. Bola ${topBall.color} em foco.`)
-      } else {
-        console.log(`Tubo ${tubeIndex} vazio.`)
-      }
-    } else if (this.selectedTube === tubeIndex) {
-      // 2. MESMO TUBO SELECIONADO NOVAMENTE: Deselecionar
-      const topBall = this.getTopBall(this.selectedTube)
-      if (topBall) {
-        topBall.y += 20 // Volta a bola para a posição original
-      }
-      clickedTube.containerSel.visible = false
-      this.selectedTube = null
-      this.movingBall = null
-      console.log(`Tubo ${tubeIndex} deselecionado.`)
-    } else {
-      // 3. OUTRO TUBO SELECIONADO: Tentar mover a bola
-      this.tubes[this.selectedTube].containerSel.visible = false
-      const sourceTube = this.tubes[this.selectedTube]
-      const targetTube = this.tubes[tubeIndex]
-      const movingBall = this.getTopBall(this.selectedTube)
-
-      // Verificar se o movimento é válido
-      if (this.isValidMove(sourceTube, targetTube, movingBall)) {
-        this.moveBall(sourceTube, targetTube, movingBall)
-      } else {
-        console.log("Movimento inválido. Deselecionando.")
-        // Retornar a bola para a posição original no tubo de origem
-        if (movingBall) {
-          movingBall.y += 20
-        }
-        this.selectedTube = null
-        this.movingBall = null
-      }
-    }
-  }
-
-  isValidMove(sourceTube, targetTube, movingBall) {
-    // Regras:
-    // 1. O tubo de origem não pode estar vazio (já verificamos que movingBall existe)
-    // 2. O tubo de destino não pode estar cheio
-    if (targetTube.balls.length >= targetTube.capacity) {
+    // Check if tube is full
+    if (tube.contents.length >= this.maxOrbsPerTube) {
       return false;
     }
-    // 3. Se o tubo de destino não estiver vazio, a bola que está sendo movida
-    //    deve ter a mesma cor que a bola do topo do tubo de destino.
-    if (targetTube.balls.length > 0) {
-      const topTargetBall = this.getTopBall(this.tubes.indexOf(targetTube));
-      if (movingBall.color !== topTargetBall.color) {
-        return false;
+
+    // Calculate orb position
+    const orbY = -254 + (this.maxOrbsPerTube - tube.contents.length - 1) * this.orbSize;
+
+    const orb = this.add.image(0, orbY, orbType);
+    // orb.setScale(0.6);
+    orb.orbType = orbType;
+
+    tube.add(orb);
+    tube.contents.unshift(orb); // Add to beginning so index 0 is top orb
+
+    this.totalOrbCount++;
+
+    return orb;
+  }
+
+  onTubeClick(tubeIndex) {
+    // Prevent interaction during animations
+    if (this.isAnimating) return;
+
+    const tube = this.tubes[tubeIndex];
+
+    // No tube selected yet, so select this one
+    if (this.selectedTube === null) {
+      if (tube.contents.length > 0) {
+        this.selectedTube = tubeIndex;
+
+        // Highlight selected tube
+        tube.getAt(0).setScale(1.04);
+        this.addGlowFx(tube.getAt(0));
       }
     }
-    return true;
+    // Same tube clicked again, deselect it
+    else if (this.selectedTube === tubeIndex) {
+      this.tubes[this.selectedTube].getAt(0).setScale(1.0);
+      this.tubes[this.selectedTube].getAt(0).preFX.clear();
+      this.selectedTube = null;
+    }
+    // Different tube clicked, try to move orbs
+    else {
+      const sourceTube = this.tubes[this.selectedTube];
+
+      // Reset highlight
+      sourceTube.getAt(0).setScale(1.0);
+      sourceTube.getAt(0).preFX.clear();
+
+      // Try to move orbs if possible
+      this.tryMoveOrbs(this.selectedTube, tubeIndex);
+
+      // Reset selection
+      this.selectedTube = null;
+    }
   }
 
-  moveBall(sourceTube, targetTube, ballToMove) {
-    // Remover a bola do tubo de origem
-    sourceTube.balls.pop();
+  tryMoveOrbs(sourceIndex, targetIndex) {
+    const sourceTube = this.tubes[sourceIndex];
+    const targetTube = this.tubes[targetIndex];
 
-    // Animar a bola
+    // Can only move if target tube isn't full
+    if (targetTube.contents.length >= this.maxOrbsPerTube) return;
+
+    // Get the top orb color from source tube
+    const sourceOrbType = sourceTube.contents[0].orbType;
+
+    // Target tube must be empty or have same color on top
+    if (targetTube.contents.length > 0 &&
+      targetTube.contents[0].orbType !== sourceOrbType) {
+      return;
+    }
+
+    // Count how many same color orbs are at the top of source tube
+    let sameColorCount = 0;
+    for (let i = 0; i < sourceTube.contents.length; i++) {
+      if (sourceTube.contents[i].orbType === sourceOrbType) {
+        sameColorCount++;
+      } else {
+        break;
+      }
+    }
+
+    // Calculate how many orbs we can move
+    const spaceInTargetTube = this.maxOrbsPerTube - targetTube.contents.length;
+    const orbsToMove = Math.min(sameColorCount, spaceInTargetTube);
+
+    // Move the orbs with animation
+    this.animateMoveOrbs(sourceIndex, targetIndex, sourceOrbType, orbsToMove);
+  }
+
+  animateMoveOrbs(sourceIndex, targetIndex, orbType, orbCount) {
+    this.isAnimating = true;
+
+    const sourceTube = this.tubes[sourceIndex];
+    const targetTube = this.tubes[targetIndex];
+    const sourceX = sourceTube.x;
+    const sourceY = sourceTube.y - 300;
     const targetX = targetTube.x;
-    const targetY = this.getNextBallY(this.tubes.indexOf(targetTube));
 
-    // Impedir cliques durante a animação
-    this.input.enabled = false;
+    let completedOrbs = 0;
 
-    // --- CÓDIGO CORRIGIDO: ENCADENAMENTO DE TWEENS ---
+    for (let i = 0; i < orbCount; i++) {
+      const orb = sourceTube.contents.shift();
+      sourceTube.remove(orb);
+      this.add.existing(orb);
+      orb.setPosition(sourceX, sourceY - (i * 10));
 
-    // 1. Tween UP (Mover para cima)
-    const tweenUp = this.tweens.add({
-      targets: ballToMove,
-      y: ballToMove.y - 80, // Subir até o ponto alto
-      duration: 120,
-      ease: 'Power1',
-      onComplete: () => {
-        // 2. Tween ACROSS (Mover horizontalmente)
-        const tweenAcross = this.tweens.add({
-          targets: ballToMove,
-          x: targetX, // Posição X do tubo de destino
-          duration: 250,
-          ease: 'Power1',
-          onComplete: () => {
-            // 3. Tween DOWN (Descer para a posição final)
-            this.tweens.add({
-              targets: ballToMove,
-              y: targetY, // Posição Y final
-              duration: 120,
-              ease: 'Power1',
-              onComplete: () => {
-                // *** Lógica de Conclusão do Movimento (pop/push/cleanup) ***
+      const newOrb = this.addOrbToTube(targetIndex, orbType);
+      newOrb.setAlpha(0);
+      this.totalOrbCount--;
 
-                // Remover a bola do tubo de origem SÓ APÓS A ANIMAÇÃO BEM SUCEDIDA
-                sourceTube.balls.pop();
-
-                // Adicionar a bola ao tubo de destino
-                targetTube.balls.push(ballToMove);
-                ballToMove.tubeIndex = this.tubes.indexOf(targetTube);
-                ballToMove.depth = 100 + targetTube.balls.length - 1;
-
-                this.selectedTube = null;
-                this.movingBall = null;
-                this.ballTween = null;
-                this.input.enabled = true; // Habilita cliques novamente
-
-                this.logTubeStates();
-
-                // Verificar condição de vitória
-                if (this.checkWinCondition()) {
-                  this.add.text(this.game.config.width / 2, this.game.config.height / 2, 'VOCÊ VENCEU!', { fontSize: '60px', fill: '#0f0' }).setOrigin(0.5);
-                }
+      this.tweens.chain({
+        targets: orb,
+        tweens: [
+          {
+            y: sourceY - 140,
+            duration: 250,
+            ease: 'Cubic.easeOut',
+            delay: i * 150 // Stagger each orb's start
+          },
+          {
+            x: targetX,
+            duration: 350,
+            ease: 'Quad.easeInOut'
+          },
+          {
+            y: targetTube.y + newOrb.y,
+            duration: 300,
+            ease: 'Sine.easeIn'
+          },
+          {
+            alpha: 0,
+            duration: 150,
+            onStart: () => {
+              this.tweens.add({
+                targets: newOrb,
+                alpha: 1,
+                duration: 150
+              });
+            },
+            onComplete: () => {
+              orb.destroy();
+              completedOrbs++;
+              if (completedOrbs === orbCount) {
+                this.isAnimating = false;
+                this.checkWin();
               }
-            });
+            }
           }
-        });
-      }
-    });
-    this.ballTween = tweenUp; // Armazene a referência do primeiro Tween.
-    // --- FIM DO CÓDIGO CORRIGIDO ---
+        ]
+      });
+    }
   }
 
-  checkWinCondition() {
-    // O jogo é ganho quando todos os tubos não-vazios estão "sortidos"
-    return this.tubes.every(tube => {
-      if (tube.balls.length === 0) {
-        return true; // Tubos vazios são considerados "sortidos" para a vitória
-      }
-      // Verifica se o tubo está cheio e se todas as bolas têm a mesma cor
-      return tube.balls.length === tube.capacity && tube.balls.every(ball => ball.color === tube.balls[0].color);
+  addGlowFx(gameItem) {
+    const fx = gameItem.preFX.addGlow(0xeb9e34);
+
+    this.tweens.add({
+      targets: fx,
+      outerStrength: 10,
+      yoyo: true,
+      loop: -1,
+      duration: 500,
+      ease: 'sine.inout'
     });
   }
 
-  // Função para debug: mostra o estado atual dos tubos
-  logTubeStates() {
-    console.log("--- Estado Atual dos Tubos ---");
-    this.tubes.forEach((tube, index) => {
-      const colorsInTube = tube.balls.map(ball => ball.color);
-      console.log(`Tubo ${index}: [${colorsInTube.join(', ')}] (Capacidade: ${tube.balls.length}/${tube.capacity})`);
-    });
-    console.log("-----------------------------");
+  checkWin() {
+    // For each color, track which tubes it appears in
+    const colorTubes = new Map();
+
+    for (let i = 0; i < this.tubes.length; i++) {
+      const tube = this.tubes[i];
+
+      // Skip empty tubes
+      if (tube.contents.length === 0) continue;
+
+      // Check if all orbs in this tube are the same color
+      const tubeColor = tube.contents[0].orbType;
+      for (const orb of tube.contents) {
+        if (orb.orbType !== tubeColor) return false; // Mixed colors in tube
+      }
+
+      // Add this tube to the color's tube list
+      if (!colorTubes.has(tubeColor)) {
+        colorTubes.set(tubeColor, [i]);
+      } else {
+        colorTubes.get(tubeColor).push(i);
+      }
+    }
+
+    // Check if any color is split across multiple tubes
+    for (const tubes of colorTubes.values()) {
+      if (tubes.length > 1) return false; // Color in multiple tubes
+    }
+
+    // If we got here, it's a win!
+    this.winText.setVisible(true);
+    this.input.once('pointerdown', () => this.scene.restart());
+
+    return true;
   }
 }
