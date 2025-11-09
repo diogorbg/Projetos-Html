@@ -1,9 +1,4 @@
-// import { Boot } from './src/Boot.js';
-// import { Game } from './src/Game.js';
-// import { GameOver } from './src/GameOver.js';
-// import { Preloader } from './src/Preloader.js';
-
-class BallSortGame extends Phaser.Scene {
+export class Game extends Phaser.Scene {
   constructor() {
     super('BallSortGame');
     this.tubes = []; // Array para armazenar os objetos dos tubos
@@ -110,7 +105,7 @@ class BallSortGame extends Phaser.Scene {
     const tube = this.tubes[tubeIndex];
     const numBalls = tube.balls.length;
     // Altura de uma bola ~ 40 * scale (0.5) = 20. Adicionar um offset de base.
-    return tube.y - (numBalls * 80 + 60); // Ajuste a posição Y para a próxima bola
+    return tube.y - (numBalls * 136 + 76); // Ajuste a posição Y para a próxima bola
   }
 
   // Lógica para lidar com o clique em um tubo
@@ -271,29 +266,3 @@ class BallSortGame extends Phaser.Scene {
     console.log("-----------------------------");
   }
 }
-
-const config = {
-  type: Phaser.AUTO,
-  width: 1080,
-  height: 1440,
-  // parent: divId,
-  // backgroundColor: '#333',
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-  },
-  scene: [
-    BallSortGame,
-    // Boot,
-    // Preloader,
-    // GameOver
-  ],
-  physics: {
-    default: 'arcade',
-    arcade: {
-      debug: false
-    }
-  }
-}
-
-const game = new Phaser.Game(config);
