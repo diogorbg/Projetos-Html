@@ -15,6 +15,8 @@ export class Game extends Phaser.Scene {
     this.load.setPath('assets');
     this.load.svg('yellow_circle', 'ball_yellow.svg', confSvg)
     this.load.svg('purple_circle', 'ball_green.svg', confSvg)
+    this.load.svg('blue', 'ball_blue.svg', confSvg)
+    this.load.svg('red', 'ball_red.svg', confSvg)
     this.load.svg('tube', 'tubo.svg', { width: 168, height: 600 })
   }
 
@@ -77,7 +79,15 @@ export class Game extends Phaser.Scene {
     this.addOrbToTube(1, 'purple_circle');
     this.addOrbToTube(1, 'purple_circle');
 
-    // Third tube is empty
+    this.addOrbToTube(2, 'red');
+    this.addOrbToTube(2, 'red');
+    this.addOrbToTube(2, 'blue');
+    this.addOrbToTube(2, 'blue');
+
+    this.addOrbToTube(3, 'blue');
+    this.addOrbToTube(3, 'red');
+    this.addOrbToTube(3, 'blue');
+    this.addOrbToTube(3, 'red');
   }
 
   addOrbToTube(tubeIndex, orbType) {
