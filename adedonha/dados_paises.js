@@ -88,7 +88,7 @@ const DADOS_PAISES = [
         "facil": [],
         "medio": ["Kuwait"],
         "dificil": ["Kiribati"],
-        "invalido": ["Kenya (versão inglês)"]
+        "invalido": ["Kenya (Quênia)"]
     },
     {
         "id": "pais_l",
@@ -113,14 +113,6 @@ const DADOS_PAISES = [
         "facil": ["Nigéria", "Noruega", "Nova Zelândia"],
         "medio": ["Nicarágua", "Namíbia", "Nepal", "Níger"],
         "dificil": ["Nauru"]
-    },
-    {
-        "id": "pais_o",
-        "texto": "Nome de países que começam com 'O'",
-        "tags": ["Geografia", "Países"],
-        "facil": [],
-        "medio": ["Omã"],
-        "dificil": []
     },
     {
         "id": "pais_p",
@@ -160,7 +152,8 @@ const DADOS_PAISES = [
         "tags": ["Geografia", "Países"],
         "facil": ["Tailândia", "Tunísia", "Turquia"],
         "medio": ["Tanzânia", "Timor-Leste", "Togo", "Trinidad e Tobago", "Taiwan (praticamente independente)", "Tchequia (República Tcheca)"],
-        "dificil": ["Tajiquistão", "Tonga", "Turcomenistão (Turquemenistão)", "Tuvalu", "Tibet (não reconhecido como país)"]
+        "dificil": ["Tajiquistão", "Tonga", "Turcomenistão (Turquemenistão)", "Tuvalu"],
+        "invalido": ["Tibete (não independente)"]
     },
     {
         "id": "pais_u",
