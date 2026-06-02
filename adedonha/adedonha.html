@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteador de Perguntas</title>
+    <style>
+        /* Variáveis de Tema (Light e Dark) */
+        :root {
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #1f2937;
+            --text-secondary: #4b5563;
+            --border: #e5e7eb;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --box-bg: #fafafa;
+            --badge-bg: #e0e7ff;
+            --badge-text: #4338ca;
+            --item-marcado-bg: #f0fdf4;
+            --item-hover: #f9fafb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --warning: #f59e0b;
+
+            /* Cores das Dificuldades */
+            --badge-facil-bg: #dcfce7;
+            --badge-facil-text: #15803d;
+            --badge-medio-bg: #fef3c7;
+            --badge-medio-text: #b45309;
+            --badge-dificil-bg: #fee2e2;
+            --badge-dificil-text: #b91c1c;
+            --badge-temp-bg: #f3e8ff;
+            --badge-temp-text: #6b21a8;
+        }
+
+        [data-theme="dark"] {
+            --bg: #111827;
+            --card: #1f2937;
+            --text: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border: #374151;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --box-bg: #1f2937;
+            --badge-bg: #312e81;
+            --badge-text: #c7d2fe;
+            --item-marcado-bg: #064e3b;
+            --item-hover: #374151;
+
+            /* Cores das Dificuldades no modo Dark */
+            --badge-facil-bg: #14532d;
+            --badge-facil-text: #4ade80;
+            --badge-medio-bg: #78350f;
+            --badge-medio-text: #fbbf24;
+            --badge-dificil-bg: #7f1d1d;
+            --badge-dificil-text: #f87171;
+            --badge-temp-bg: #581c87;
+            --badge-temp-text: #c084fc;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+
+        .header-app {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            width: auto;
+            flex: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        button.secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        /* --- Estilos do Cronômetro --- */
+        .cronometro-box {
+            background: var(--box-bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .crono-tempo {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: monospace;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .crono-tempo.alerta {
+            color: var(--danger);
+            animation: piscar 0.5s infinite alternate;
+        }
+
+        .crono-controles {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .crono-controles button {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            flex: none;
+        }
+
+        .crono-controles button.btn-play {
+            background: #10b981;
+        }
+
+        .crono-controles button.btn-pause {
+            background: var(--warning);
+            color: #1f2937;
+        }
+
+        .crono-controles button.btn-clear {
+            background: var(--danger);
+        }
+
+        .crono-config {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .crono-config select {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            font-weight: bold;
+        }
+
+        @keyframes piscar {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0.4;
+            }
+        }
+
+        /* --- Restante dos Estilos --- */
+        .tags {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .box-pergunta {
+            border: 2px solid var(--border);
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 80px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: var(--box-bg);
+        }
+
+        .contador-respostas {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .respostas-lista {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+
+        .resposta-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .resposta-item:hover {
+            background: var(--item-hover);
+        }
+
+        .resposta-item input {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .resposta-item.marcada {
+            text-decoration: line-through;
+            opacity: 0.6;
+            background: var(--item-marcado-bg);
+        }
+
+        /* Estilos Estilizados dos Badges de Dificuldade */
+        .badge-dif {
+            font-size: 0.7rem;
+            padding: 3px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-dif.facil {
+            background: var(--badge-facil-bg);
+            color: var(--badge-facil-text);
+        }
+
+        .badge-dif.medio {
+            background: var(--badge-medio-bg);
+            color: var(--badge-medio-text);
+        }
+
+        .badge-dif.dificil {
+            background: var(--badge-dificil-bg);
+            color: var(--badge-dificil-text);
+        }
+
+        .badge-dif.temp {
+            background: var(--badge-temp-bg);
+            color: var(--badge-temp-text);
+        }
+
+        .add-temp {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-temp input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card);
+            color: var(--text);
+        }
+
+        .status {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header-app">
+            <h1>Sorteador Offline</h1>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 Dark</button>
+        </div>
+
+        <div class="actions">
+            <button id="btn-sortear" onclick="sortearPergunta()">Sortear Pergunta</button>
+            <button class="secondary" onclick="resetarJogo()">Resetar Tudo</button>
+        </div>
+
+        <div class="cronometro-box">
+            <div class="crono-config">
+                <label style="font-size: 0.75rem; font-weight: bold;">Tempo:</label>
+                <select id="crono-tempo-select" onchange="resetarCronometro()">
+                    <option value="10">10s</option>
+                    <option value="15">15s</option>
+                    <option value="20">20s</option>
+                    <option value="25">25s</option>
+                    <option value="30" selected>30s</option>
+                </select>
+            </div>
+            <div id="crono-display" class="crono-tempo">30</div>
+            <div class="crono-controles">
+                <button class="btn-play" id="btn-crono-start" onclick="iniciarCronometro()">▶ Iniciar</button>
+                <button class="btn-pause" id="btn-crono-pause" onclick="pausarCronometro()" style="display:none;">⏸
+                    Pausar</button>
+                <button class="btn-clear" onclick="resetarCronometro()">⏹</button>
+            </div>
+        </div>
+
+        <div id="tags-container" class="tags"></div>
+        <div id="pergunta-texto" class="box-pergunta">Clique em Sortear para começar!</div>
+
+        <div id="contador-container" class="contador-respostas" style="display: none;">
+            Respostas marcadas: <span id="num-marcadas">0</span> / <span id="num-totais">0</span>
+        </div>
+
+        <ul id="lista-respostas" class="respostas-lista"></ul>
+
+        <div class="add-temp" id="area-add-temp" style="display: none;">
+            <input type="text" id="input-nova-resposta" placeholder="Adicionar resposta temporária...">
+            <button style="flex: none; width: auto;" onclick="adicionarRespostaTemporaria()">+</button>
+        </div>
+
+        <div id="status-progresso" class="status"></div>
+    </div>
+
+    <script>
+        // 1. Banco de Dados com Categorização por Vetores (Fácil, Médio, Difícil)
+        const BANCO_DADOS = [
+            {
+                "id": "animais_ba",
+                "texto": "Nome de animais que começam com 'BA'",
+                "tags": ["Animais", "Letra B"],
+                "facil": ["Baleia", "Barata", "Babuíno", "Baiacu"],
+                "medio": ["Bagre"],
+                "dificil": ["Badejo (peixe)"],
+                "invalido": ["Bacalhau (é um processo)"]
+            },
+            {
+                "id": "animais_be",
+                "texto": "Nome de animais que começam com 'BE'",
+                "tags": ["Animais", "Letra B"],
+                "facil": ["Beija-flor", "Besouro", "Bezerro", "Bem-te-vi"],
+                "medio": ["Beluga"],
+                "dificil": ["Berbigão (molusco)"]
+            },
+            {
+                "id": "animais_bi",
+                "texto": "Nome de animais que começam com 'BI'",
+                "tags": ["Animais", "Letra B"],
+                "facil": ["Bicho-da-seda", "Bicho-preguiça", "Bisão"],
+                "medio": [],
+                "dificil": ["Bico-de-lacre (ave)", "Biguá (ave)", "Bico-de-tesoura (ave)"]
+            },
+            {
+                "id": "animais_bo",
+                "texto": "Nome de animais que começam com 'BO'",
+                "tags": ["Animais", "Letra B"],
+                "facil": ["Boi", "Borboleta", "Boto", "Bode"],
+                "medio": [],
+                "dificil": ["Bodião (peixe)", "Bonobo (chimpanzé)", "Borrelho (ave)",]
+            },
+            {
+                "id": "animais_bu",
+                "tags": ["Animais", "Letra B"],
+                "texto": "Nome de animais que começam com 'BU'",
+                "facil": ["Burro", "Búfalo"],
+                "medio": ["Búzio (moluscos marinhos)"],
+                "dificil": ["Bugio (Guariba)", "Bufo-Real (Coruja)"]
+            },
+            {
+                "id": "animais_ca",
+                "texto": "Nome de animais que começam com 'CA'",
+                "tags": ["Animais", "Letra C"],
+                "facil": ["Cabra", "Cachorro", "Caranguejo", "Caranguejeira", "Caracol", "Camelo", "Carneiro", "Castor", "Cascavel", "Carrapato", "Canário", "Cacatua", "Calango", "Canguru", "Camaleão", "Camarão", "Cavalo", "Capivara"],
+                "medio": ["Carpa", "Caititu", "Cachalote", "Cágado", "Carcará (ave)"],
+                "dificil": ["Caracal (lince-do-deserto)", "Cariama (Seriema)"]
+            },
+            {
+                "id": "animais_ce",
+                "texto": "Nome de animais que começam com 'CE'",
+                "tags": ["Animais", "Letra C"],
+                "facil": ["Cegonha", "Centopeia"],
+                "medio": ["Cervo"],
+                "dificil": ["Cebus (Macaco)"]
+            },
+            {
+                "id": "animais_ci",
+                "texto": "Nome de animais que começam com 'CI'",
+                "tags": ["Animais", "Letra C"],
+                "facil": ["Cigarra", "Cisne"],
+                "medio": [],
+                "dificil": ["Civeta (mamífero)"]
+            },
+            {
+                "id": "animais_co",
+                "texto": "Nome de animais que começam com 'CO'",
+                "tags": ["Animais", "Letra C"],
+                "facil": ["Coelho", "Cobra", "Coruja", "Coala", "Codorna"],
+                "medio": ["Coiote", "Cordeiro (filhote ovelha)"],
+                "dificil": ["Colhereiro (ave)"]
+            },
+            {
+                "id": "animais_cu",
+                "texto": "Nome de animais que começam com 'CU'",
+                "tags": ["Animais", "Letra C"],
+                "facil": ["Cuco", "Cupim", "Cutia"],
+                "medio": ["Curió (pássaro)", "Cuíca (marsupial)", "Cuiu-cuiu (peixe/papagaio)"],
+                "dificil": ["Curicaca (ave)", "Curimbatá (peixe)", "Curiango (ave)"]
+            },
+            {
+                "id": "animais_di",
+                "texto": "Nome de animais que começam com 'DI'",
+                "tags": ["Animais", "Letra D"],
+                "facil": ["Diabo-da-tasmânia"],
+                "medio": ["Dingo (Cão selvagem)"],
+                "dificil": ["Diablotim (ave)"]
+            },
+            {
+                "id": "animais_do",
+                "texto": "Nome de animais que começam com 'DO'",
+                "tags": ["Animais", "Letra D"],
+                "facil": ["Dourado", "Dodô"],
+                "medio": ["Doninha"],
+                "dificil": ["Dom-fafe (pássaro)"]
+            },
+
+            /*
+            {
+                "id": "pais_a",
+                "texto": "Nome de países que começam com 'A'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Alemanha", "Angola", "Argentina", "Austrália", "Afeganistão", "África do Sul"],
+                "medio": ["Áustria", "Arábia Saudita", "Argélia", "Armênia"],
+                "dificil": ["Albânia", "Andorra", "Antígua e Barbuda", "Azerbaijão"]
+            },
+            {
+                "id": "pais_b",
+                "texto": "Nome de países que começam com 'B'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Brasil", "Bolívia", "Bélgica"],
+                "medio": ["Bangladesh", "Bulgária", "Bahamas", "Bielorrússia", "Bósnia e Herzegovina", "Butão"],
+                "dificil": ["Belize", "Bahrein", "Barbados", "Benim", "Botsuana", "Brunei", "Burquina Fasso", "Burundi"]
+            },
+            {
+                "id": "pais_c",
+                "texto": "Nome de países que começam com 'C'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Canadá", "China", "Colômbia", "Cuba", "Chile", "Costa Rica", "Coreia do Sul", "Coreia do Norte"],
+                "medio": ["Cabo Verde", "Camarões", "Catar (ou Qatar)", "Croácia", "Congo (República do Congo)"],
+                "dificil": ["Camboja", "Cazaquistão", "Chade", "Chipre", "Comores", "Costa do Marfim"]
+            },
+            {
+                "id": "pais_d",
+                "texto": "Nome de países que começam com 'D'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Dinamarca"],
+                "medio": ["Dominica"],
+                "dificil": ["Djibuti"],
+                "invalido": ["República Dominicana"]
+            },
+            {
+                "id": "pais_e",
+                "texto": "Nome de países que começam com 'E'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Egito", "Equador", "Espanha", "Estados Unidos"],
+                "medio": ["El Salvador", "Emirados Árabes Unidos", "Eslováquia", "Eslovênia", "Estônia", "Etiópia"],
+                "dificil": ["Eritreia", "Eswatini"]
+            },
+            {
+                "id": "pais_f",
+                "texto": "Nome de países que começam com 'F'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["França", "Finlândia", "Filipinas"],
+                "medio": [],
+                "dificil": ["Fiji"]
+            },
+            {
+                "id": "pais_g",
+                "texto": "Nome de países que começam com 'G'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Grécia", "Guatemala", "Guiana"],
+                "medio": ["Gabão", "Gana", "Geórgia", "Guiné"],
+                "dificil": ["Gâmbia", "Granada", "Guiné-Bissau", "Guiné Equatorial"]
+            },
+            {
+                "id": "pais_h",
+                "texto": "Nome de países que começam com 'H'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Holanda (Países Baixos)"],
+                "medio": ["Haiti", "Honduras", "Hungria"],
+                "dificil": []
+            },
+            {
+                "id": "pais_i",
+                "texto": "Nome de países que começam com 'I'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Índia", "Indonésia", "Irlanda", "Israel", "Itália"],
+                "medio": ["Iêmen", "Irã", "Iraque", "Islândia"],
+                "dificil": [],
+                "invalido": ["Iugoslávia (não existe mais)"]
+            },
+            {
+                "id": "pais_j",
+                "texto": "Nome de países que começam com 'J'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Jamaica", "Japão"],
+                "medio": ["Jordânia"],
+                "dificil": []
+            },
+            {
+                "id": "pais_k",
+                "texto": "Nome de países que começam com 'K'",
+                "tags": ["Geografia", "Países"],
+                "facil": [],
+                "medio": ["Kuwait"],
+                "dificil": ["Kiribati"],
+                "invalido": ["Kenya (versão inglês)"]
+            },
+            {
+                "id": "pais_l",
+                "texto": "Nome de países que começam com 'L'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Líbano", "Líbia", "Luxemburgo"],
+                "medio": ["Laos", "Letônia", "Libéria", "Lituânia"],
+                "dificil": ["Lesoto", "Liechtenstein"]
+            },
+            {
+                "id": "pais_m",
+                "texto": "Nome de países que começam com 'M'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Marrocos", "México", "Moçambique", "Mônaco"],
+                "medio": ["Madagascar", "Malásia", "Maldivas", "Mali", "Malta", "Mianmar", "Mongólia", "Montenegro"],
+                "dificil": ["Malaui", "Maurício (Ilhas Maurício)", "Mauritânia", "Micronésia", "Moldávia", "Macedônia do Norte"]
+            },
+            {
+                "id": "pais_n",
+                "texto": "Nome de países que começam com 'N'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Nigéria", "Noruega", "Nova Zelândia"],
+                "medio": ["Nicarágua", "Namíbia", "Nepal", "Níger"],
+                "dificil": ["Nauru"]
+            },
+            {
+                "id": "pais_o",
+                "texto": "Nome de países que começam com 'O'",
+                "tags": ["Geografia", "Países"],
+                "facil": [],
+                "medio": ["Omã"],
+                "dificil": []
+            },
+            {
+                "id": "pais_p",
+                "texto": "Nome de países que começam com 'P'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Países Baixos (Holanda)", "Panamá", "Paraguai", "Peru", "Polônia", "Portugal"],
+                "medio": ["Paquistão", "Papua-Nova Guiné"],
+                "dificil": ["Palau"]
+            },
+            {
+                "id": "pais_q",
+                "texto": "Nome de países que começam com 'Q'",
+                "tags": ["Geografia", "Países"],
+                "facil": [],
+                "medio": ["Qatar (Catar)", "Quênia"],
+                "dificil": ["Quirguistão"]
+            },
+            {
+                "id": "pais_r",
+                "texto": "Nome de países que começam com 'R'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Rússia"],
+                "medio": ["República Tcheca", "Romênia", "Ruanda"],
+                "dificil": ["Reino Unido (União Política)", "República Centro-Africana", "República Democrática do Congo", "República Dominicana"]
+            },
+            {
+                "id": "pais_s",
+                "texto": "Nome de países que começam com 'S'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Senegal", "Sérvia", "Singapura", "Síria", "Suécia", "Suíça"],
+                "medio": ["Somália", "Sri Lanka", "Sudão", "Sudão do Sul", "Suriname", "Samoa", "Serra Leoa"],
+                "dificil": ["Salomão", "Santa Lúcia", "São Cristóvão e Neves", "São Tomé e Príncipe", "São Vicente e Granadinas", "Seychelles"]
+            },
+            {
+                "id": "pais_t",
+                "texto": "Nome de países que começam com 'T'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Tailândia", "Tunísia", "Turquia"],
+                "medio": ["Tanzânia", "Timor-Leste", "Togo", "Trinidad e Tobago", "Taiwan (praticamente independente)", "Tchequia (República Tcheca)"],
+                "dificil": ["Tajiquistão", "Tonga", "Turcomenistão (Turquemenistão)", "Tuvalu", "Tibet (não reconhecido como país)"]
+            },
+            {
+                "id": "pais_u",
+                "texto": "Nome de países que começam com 'U'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Ucrânia", "Uruguai"],
+                "medio": ["Uganda"],
+                "dificil": ["Uzbequistão"]
+            },
+            {
+                "id": "pais_v",
+                "texto": "Nome de países que começam com 'V'",
+                "tags": ["Geografia", "Países"],
+                "facil": ["Vaticano", "Venezuela", "Vietnã"],
+                "medio": [],
+                "dificil": ["Vanuatu"]
+            },
+            {
+                "id": "pais_x",
+                "texto": "Nome de países que começam com 'X'",
+                "tags": ["Geografia", "Países"],
+                "facil": [],
+                "medio": [],
+                "dificil": ["Xian"],
+                "invalido": ["Chechênia"]
+            },
+            {
+                "id": "pais_z",
+                "texto": "Nome de países que começam com 'Z'",
+                "tags": ["Geografia", "Países"],
+                "facil": [],
+                "medio": ["Zimbábue"],
+                "dificil": ["Zâmbia"]
+            },
+            */
+        ];
+
+        // Estado Local do Jogo
+        let gameState = {
+            perguntaAtualId: null,
+            perguntasSorteadas: [],
+            respostasUtilizadas: [],
+            respostasTemporarias: []
+        };
+
+        // Estado do Cronômetro
+        let timerId = null;
+        let tempoRestante = 30;
+        let audioCtx = null;
+
+        // Inicialização
+        window.onload = () => {
+            initTheme();
+
+            const salvo = localStorage.getItem('pwa_game_state');
+            if (salvo) {
+                gameState = JSON.parse(salvo);
+                if (gameState.perguntaAtualId) {
+                    renderizarPerguntaAtual();
+                }
+            }
+            resetarCronometro();
+            atualizarStatus();
+        };
+
+        // --- Gerador de Sons Dinâmico ---
+        function inicializarAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function tocarSomTic() {
+            try {
+                inicializarAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                gain.gain.setValueAtTime(1.0, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch (e) { console.log(e); }
+        }
+
+        function tocarSomAlarme() {
+            try {
+                inicializarAudio();
+                [440, 880].forEach(freq => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 1.2);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 1.2);
+                });
+            } catch (e) { console.log(e); }
+        }
+
+        // --- Controle do Cronômetro ---
+        function iniciarCronometro() {
+            if (timerId) return;
+            inicializarAudio();
+
+            document.getElementById('btn-crono-start').style.display = 'none';
+            document.getElementById('btn-crono-pause').style.display = 'inline-block';
+            document.getElementById('crono-tempo-select').disabled = true;
+
+            timerId = setInterval(() => {
+                tempoRestante--;
+                document.getElementById('crono-display').innerText = tempoRestante;
+
+                if (tempoRestante <= 5 && tempoRestante > 0) {
+                    document.getElementById('crono-display').classList.add('alerta');
+                }
+
+                if (tempoRestante > 0) {
+                    tocarSomTic();
+                } else {
+                    pausarCronometro();
+                    tocarSomAlarme();
+                    document.getElementById('crono-display').classList.add('alerta');
+                }
+            }, 1000);
+        }
+
+        function pausarCronometro() {
+            clearInterval(timerId);
+            timerId = null;
+            document.getElementById('btn-crono-start').style.display = 'inline-block';
+            document.getElementById('btn-crono-pause').style.display = 'none';
+        }
+
+        function resetarCronometro() {
+            pausarCronometro();
+            const select = document.getElementById('crono-tempo-select');
+            tempoRestante = parseInt(select.value, 10);
+
+            select.disabled = false;
+            const display = document.getElementById('crono-display');
+            display.innerText = tempoRestante;
+            display.classList.remove('alerta');
+        }
+
+        // --- Sistema de Tema ---
+        function initTheme() {
+            const temaSalvo = localStorage.getItem('pwa_theme');
+            const prefereDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (temaSalvo === 'dark' || (!temaSalvo && prefereDark)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-btn').innerText = "☀️ Light";
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('theme-btn').innerText = "🌙 Dark";
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('theme-btn').innerText = "🌙 Dark";
+                localStorage.setItem('pwa_theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-btn').innerText = "☀️ Light";
+                localStorage.setItem('pwa_theme', 'dark');
+            }
+        }
+
+        // --- Lógica do Jogo ---
+        function salvarEstado() {
+            localStorage.setItem('pwa_game_state', JSON.stringify(gameState));
+            atualizarStatus();
+        }
+
+        function sortearPergunta() {
+            const disponiveis = BANCO_DADOS.filter(p => !gameState.perguntasSorteadas.includes(p.id));
+
+            if (disponiveis.length === 0) {
+                alert("Todas as perguntas já foram sorteadas! Resetando lista de sorteio automaticamente.");
+                gameState.perguntasSorteadas = [];
+                sortearPergunta();
+                return;
+            }
+
+            const sorteada = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+
+            gameState.perguntaAtualId = sorteada.id;
+            gameState.perguntasSorteadas.push(sorteada.id);
+            gameState.respostasUtilizadas = [];
+            gameState.respostasTemporarias = [];
+
+            salvarEstado();
+            renderizarPerguntaAtual();
+            resetarCronometro();
+        }
+
+        function renderizarPerguntaAtual() {
+            const pergunta = BANCO_DADOS.find(p => p.id === gameState.perguntaAtualId);
+            if (!pergunta) return;
+
+            document.getElementById('pergunta-texto').innerText = pergunta.texto;
+
+            // Renderizar Tags
+            const tagsContainer = document.getElementById('tags-container');
+            tagsContainer.innerHTML = '';
+            pergunta.tags.forEach(tag => {
+                tagsContainer.innerHTML += `<span class="tag">${tag}</span>`;
+            });
+
+            // Mapear e unificar os 3 vetores de dificuldade + as temporárias
+            const todasRespostas = [
+                ...(pergunta.facil || []).map(r => ({ texto: r, dif: 'facil' })),
+                ...(pergunta.medio || []).map(r => ({ texto: r, dif: 'medio' })),
+                ...(pergunta.dificil || []).map(r => ({ texto: r, dif: 'dificil' })),
+                ...gameState.respostasTemporarias.map(r => ({ texto: r, dif: 'temp' }))
+            ];
+
+            // Atualizar Contador Geral
+            document.getElementById('contador-container').style.display = 'block';
+            document.getElementById('num-totais').innerText = todasRespostas.length;
+            document.getElementById('num-marcadas').innerText = gameState.respostasUtilizadas.length;
+
+            // Renderizar Lista
+            const lista = document.getElementById('lista-respostas');
+            lista.innerHTML = '';
+
+            todasRespostas.forEach(resp => {
+                const jaUsada = gameState.respostasUtilizadas.includes(resp.texto);
+                const li = document.createElement('li');
+                li.className = `resposta-item ${jaUsada ? 'marcada' : ''}`;
+                li.onclick = () => alternarResposta(resp.texto);
+
+                li.innerHTML = `
+                    <input type="checkbox" ${jaUsada ? 'checked' : ''}>
+                    <span>${resp.texto}</span>
+                    <span class="badge-dif ${resp.dif}">${resp.dif === 'temp' ? 'Temp' : resp.dif}</span>
+                `;
+                lista.appendChild(li);
+            });
+
+            document.getElementById('area-add-temp').style.display = 'flex';
+        }
+
+        function alternarResposta(texto) {
+            const index = gameState.respostasUtilizadas.indexOf(texto);
+            if (index > -1) {
+                gameState.respostasUtilizadas.splice(index, 1);
+            } else {
+                gameState.respostasUtilizadas.push(texto);
+            }
+            salvarEstado();
+            renderizarPerguntaAtual();
+        }
+
+        function adicionarRespostaTemporaria() {
+            const input = document.getElementById('input-nova-resposta');
+            const valor = input.value.trim();
+            if (!valor) return;
+
+            const pergunta = BANCO_DADOS.find(p => p.id === gameState.perguntaAtualId);
+            if (!pergunta) return;
+
+            // Une todos os vetores para validar duplicados
+            const todasExistentes = [
+                ...(pergunta.facil || []),
+                ...(pergunta.medio || []),
+                ...(pergunta.dificil || []),
+                ...gameState.respostasTemporarias
+            ];
+
+            const higienizar = str => str.toLowerCase().replace(/\s+/g, ' ').trim();
+            const duplicada = todasExistentes.some(r => higienizar(r) === higienizar(valor));
+
+            if (duplicada) {
+                alert(`A resposta "${valor}" já está na lista dessa pergunta!`);
+                input.value = '';
+                return;
+            }
+
+            gameState.respostasTemporarias.push(valor);
+            gameState.respostasUtilizadas.push(valor);
+
+            salvarEstado();
+            renderizarPerguntaAtual();
+            input.value = '';
+        }
+
+        function resetarJogo() {
+            if (confirm("Deseja limpar todo o progresso local?")) {
+                gameState = {
+                    perguntaAtualId: null,
+                    perguntasSorteadas: [],
+                    respostasUtilizadas: [],
+                    respostasTemporarias: []
+                };
+                localStorage.removeItem('pwa_game_state');
+                document.getElementById('pergunta-texto').innerText = "Clique em Sortear para começar!";
+                document.getElementById('lista-respostas').innerHTML = '';
+                document.getElementById('tags-container').innerHTML = '';
+                document.getElementById('contador-container').style.display = 'none';
+                document.getElementById('area-add-temp').style.display = 'none';
+                resetarCronometro();
+                atualizarStatus();
+            }
+        }
+
+        function atualizarStatus() {
+            const total = BANCO_DADOS.length;
+            const sorteadas = gameState.perguntasSorteadas.length;
+            document.getElementById('status-progresso').innerText = `Perguntas vistas: ${sorteadas} de ${total}`;
+        }
+    </script>
+</body>
+
+</html>
