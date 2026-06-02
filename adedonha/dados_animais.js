@@ -141,4 +141,70 @@ const DADOS_ANIMAIS = [
         "medio": ["Doninha"],
         "dificil": ["Dom-fafe (pássaro)"]
     },
+    {
+        "id": "animais_fa",
+        "texto": "Nome de animais que começam com 'FA'",
+        "tags": ["Animais", "Letra F"],
+        "facil": ["Falcão"],
+        "medio": ["Faisão"],
+        "dificil": []
+    },
+    {
+        "id": "animais_fo",
+        "texto": "Nome de animais que começam com 'FO'",
+        "tags": ["Animais", "Letra F"],
+        "facil": ["Foca", "Formiga"],
+        "medio": [],
+        "dificil": ["Fossa (carnívoro de Madagascar)"]
+    },
+    {
+        "id": "animais_fu",
+        "texto": "Nome de animais que começam com 'FU'",
+        "tags": ["Animais", "Letra F"],
+        "facil": ["Furão"],
+        "medio": ["Fuinha"],
+        "dificil": ["Fulmar (ave marinha)", "Fura-olho (ave)"],
+        "invalido": ["Fungo"]
+    },
+    {
+        "id": "animais_ga",
+        "texto": "Nome de animais que começam com 'GA'",
+        "tags": ["Animais", "Letra G"],
+        "facil": ["Gato", "Galo", "Galinha", "Gafanhoto", "Gaivota", "Ganso", "Gavião"],
+        "medio": [],
+        "dificil": ["Gamo (cervo)", "Galago (primata)", "Gauro (bisão-indiano)"]
+    },
+    {
+        "id": "animais_gi",
+        "texto": "Nome de animais que começam com 'GI'",
+        "tags": ["Animais", "Letra G"],
+        "facil": ["Girafa", "Girino (fase larval)"],
+        "medio": [],
+        "dificil": ["Gineta (carnívoro)", "Gibão (macaco)"]
+    },
+    {
+        "id": "animais_go",
+        "texto": "Nome de animais que começam com 'GO'",
+        "tags": ["Animais", "Letra G"],
+        "facil": ["Gorila", "Golfinho"],
+        "medio": [],
+        "dificil": ["Goral (antílope)", "Gorrião (pardal)"]
+    },
+    {
+        "id": "animais_gu",
+        "texto": "Nome de animais que começam com 'GU'",
+        "tags": ["Animais", "Letra G"],
+        "facil": ["Guaxinim"],
+        "medio": ["Guariba (macaco)", "Guará (ave)"],
+        "dificil": ["Guriatã (ave)", "Guanaco (camelídeo)", "Gundi (roedor)", "Guaiamu (caranguejo)"],
+        "invalido": ["Lobo-Guará"]
+    },
+    {
+        "id": "animais_h",
+        "texto": "Nome de animais que começam com 'H'",
+        "tags": ["Animais", "Letra H"],
+        "facil": ["Hiena", "Hipopótamo", "Hamster"],
+        "medio": ["Harpia (gavião-real)"],
+        "dificil": ["Haliote (molusco)"]
+    },
 ]
