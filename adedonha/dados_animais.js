@@ -32,8 +32,7 @@ const DADOS_ANIMAIS = [
         "tags": ["Animais", "Letra O"],
         "facil": ["Ovelha", "Orca", "Ostra", "Onça"],
         "medio": ["Orangotango", "Ouriço-do-mar", "Ouriço"],
-        "dificil": ["Ocapi (mamífero)", "Olho-de-boi (peixe)", "Onagro (asno selvagem)", "Oribi (antílope)"],
-        "invalido": []
+        "dificil": ["Ocapi (mamífero)", "Olho-de-boi (peixe)", "Onagro (asno selvagem)", "Oribi (antílope)"]
     },
     {
         "id": "animais_u",
