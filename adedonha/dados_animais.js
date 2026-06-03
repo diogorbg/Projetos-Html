@@ -125,44 +125,20 @@ const DADOS_ANIMAIS = [
         "dificil": ["Curicaca (ave)", "Curimbatá (peixe)", "Curiango (ave)"]
     },
     {
-        "id": "animais_di",
-        "texto": "Nome de animais que começam com 'DI'",
+        "id": "animais_d",
+        "texto": "Nome de animais que começam com 'D'",
         "tags": ["Animais", "Letra D"],
-        "facil": ["Diabo-da-tasmânia"],
-        "medio": ["Dingo (Cão selvagem)"],
-        "dificil": ["Diablotim (ave)"]
+        "facil": ["Diabo-da-tasmânia", "Dodô", "Doninha"],
+        "medio": ["Dingo (cão selvagem)", "Dourado (peixe)"],
+        "dificil": ["Diablotim (ave)", "Dom-fafe (pássaro)"]
     },
     {
-        "id": "animais_do",
-        "texto": "Nome de animais que começam com 'DO'",
-        "tags": ["Animais", "Letra D"],
-        "facil": ["Dourado", "Dodô"],
-        "medio": ["Doninha"],
-        "dificil": ["Dom-fafe (pássaro)"]
-    },
-    {
-        "id": "animais_fa",
-        "texto": "Nome de animais que começam com 'FA'",
+        "id": "animais_f",
+        "texto": "Nome de animais que começam com 'F'",
         "tags": ["Animais", "Letra F"],
-        "facil": ["Falcão"],
-        "medio": ["Faisão"],
-        "dificil": []
-    },
-    {
-        "id": "animais_fo",
-        "texto": "Nome de animais que começam com 'FO'",
-        "tags": ["Animais", "Letra F"],
-        "facil": ["Foca", "Formiga"],
-        "medio": [],
-        "dificil": ["Fossa (carnívoro de Madagascar)"]
-    },
-    {
-        "id": "animais_fu",
-        "texto": "Nome de animais que começam com 'FU'",
-        "tags": ["Animais", "Letra F"],
-        "facil": ["Furão"],
-        "medio": ["Fuinha"],
-        "dificil": ["Fulmar (ave marinha)", "Fura-olho (ave)"],
+        "facil": ["Falcão", "Foca", "Formiga"],
+        "medio": ["Faisão", "Furão", "Fuinha"],
+        "dificil": ["Fossa (carnívoro de Madagascar)", "Fulmar (ave marinha)", "Fura-olho (ave)"],
         "invalido": ["Fungo"]
     },
     {
@@ -177,8 +153,8 @@ const DADOS_ANIMAIS = [
         "id": "animais_gi",
         "texto": "Nome de animais que começam com 'GI'",
         "tags": ["Animais", "Letra G"],
-        "facil": ["Girafa", "Girino (fase larval)"],
-        "medio": [],
+        "facil": ["Girafa"],
+        "medio": ["Girino (fase larval)"],
         "dificil": ["Gineta (carnívoro)", "Gibão (macaco)"]
     },
     {
