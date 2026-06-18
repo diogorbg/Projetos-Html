@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Player de Música</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .player-container {
+            text-align: center;
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 450px;
+        }
+
+        /* O "segredo" para a imagem de fundo e transmissão na TV */
+        video {
+            width: 100%;
+            max-height: 250px;
+            border-radius: 10px;
+            background-color: #000;
+            object-fit: cover;
+            /* Garante que a imagem preencha o espaço */
+        }
+
+        .track-info {
+            margin: 15px 0;
+        }
+
+        .track-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .track-artist {
+            font-size: 1rem;
+            color: #b3b3b3;
+        }
+
+        .custom-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: #28a745;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="player-container">
+        <video id="meu-player" controls controlsList="nodownload"></video>
+
+        <div class="track-info">
+            <div id="titulo" class="track-title">Nome da Música</div>
+            <div id="artista" class="track-artist">Artista</div>
+        </div>
+
+        <div class="custom-controls">
+            <button class="btn" onclick="musicaAnterior()">⏮ Voltar</button>
+            <button class="btn" onclick="proximaMusica()">Avançar ⏭</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Cadastro das músicas direto no código
+        const playlist = [
+            {
+                titulo: "Música Exemplo 2",
+                // artista: "Artista Beta",
+                audioUrl: "file://c:/Users/diogo/Music/Donkey Kong Country • Full Lofi Jazz Remix Album (Cozy 16-Bit Jungle Beats) - Pixel Save Room (youtube).mp3",
+                capaUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&q=80"
+            },
+            {
+                titulo: "Música Exemplo 1",
+                // artista: "Artista Alpha",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                capaUrl: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=500&q=80"
+            },
+        ];
+
+        let indiceAtual = 0;
+        const player = document.getElementById('meu-player');
+        const txtTitulo = document.getElementById('titulo');
+        const txtArtista = document.getElementById('artista');
+
+        // 2. Função para carregar e atualizar a música na tela
+        function carregarMusica(indice) {
+            const musica = playlist[indice];
+
+            player.src = musica.audioUrl;
+            player.poster = musica.capaUrl; // Atualiza o bg (imagem associada)
+
+            txtTitulo.innerText = musica.titulo;
+            txtArtista.innerText = musica.artista;
+        }
+
+        // 3. Controles de navegação
+        function proximaMusica() {
+            indiceAtual++;
+            if (indiceAtual >= playlist.length) {
+                indiceAtual = 0; // Volta para o início se acabar
+            }
+            carregarMusica(indiceAtual);
+            player.play();
+        }
+
+        function musicaAnterior() {
+            indiceAtual--;
+            if (indiceAtual < 0) {
+                indiceAtual = playlist.length - 1; // Vai para a última se voltar do início
+            }
+            carregarMusica(indiceAtual);
+            player.play();
+        }
+
+        // 4. Quando a música atual terminar, passa automaticamente para a próxima
+        player.addEventListener('ended', proximaMusica);
+
+        // Inicializa o player com a primeira música da lista ao carregar a página
+        window.onload = () => {
+            carregarMusica(indiceAtual);
+        };
+    </script>
+
+</body>
+
+</html>
