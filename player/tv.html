@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Transmissão TV 720p</title>
+    <style>
+        /* Remove qualquer borda ou barra de rolagem para o vídeo ocupar 100% dos 720p */
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+
+    <video id="player-tv" controls controlsList="nodownload"></video>
+
+    <script src="playlist.js"></script>
+    <script>
+        let indiceAtual = 0;
+        const player = document.getElementById('player-tv');
+
+        function carregarMusica(indice) {
+            const musica = playlist[indice];
+            player.src = musica.audioUrl;
+            player.poster = musica.capaUrl;
+
+            // Avisa a janela principal qual música está tocando
+            window.opener.postMessage({ titulo: musica.titulo, artista: musica.artista }, '*');
+        }
+
+        function proxima() {
+            indiceAtual = (indiceAtual + 1) >= playlist.length ? 0 : indiceAtual + 1;
+            carregarMusica(indiceAtual);
+            player.play();
+        }
+
+        function anterior() {
+            indiceAtual = (indiceAtual - 1) < 0 ? playlist.length - 1 : indiceAtual - 1;
+            carregarMusica(indiceAtual);
+            player.play();
+        }
+
+        player.addEventListener('ended', proxima);
+
+        // Escuta os comandos vindos do Painel de Controle
+        window.addEventListener('message', (event) => {
+            const comando = event.data.comando;
+            if (comando === 'play') player.play();
+            if (comando === 'pause') player.pause();
+            if (comando === 'proxima') proxima();
+            if (comando === 'anterior') anterior();
+        });
+
+        window.onload = () => { carregarMusica(indiceAtual); };
+    </script>
+
+</body>
+
+</html>
