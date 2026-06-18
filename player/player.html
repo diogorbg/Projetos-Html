@@ -123,7 +123,31 @@
             player.src = musica.audioUrl;
             player.poster = musica.capaUrl;
             txtTitulo.innerText = musica.titulo;
-            txtArtista.innerText = musica.artista;
+            // txtArtista.innerText = musica.artista;
+
+            // --- NOVA PARTE: Integração com o Windows ---
+            // não funcionou... mas fica a ideia
+            /*if ('mediaSession' in navigator) {
+                // 1. Atualiza as informações no painel do Windows
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: musica.titulo,
+                    artist: musica.artista,
+                    album: 'Minha Playlist TV',
+                    artwork: [
+                        { src: musica.capaUrl, sizes: '512x512', type: 'image/jpeg' }
+                    ]
+                });
+
+                // 2. Mapeia o botão "Anterior" do Windows/Teclado
+                navigator.mediaSession.setActionHandler('previoustrack', () => {
+                    anterior();
+                });
+
+                // 3. Mapeia o botão "Próximo" do Windows/Teclado
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    proxima();
+                });
+            }*/
         }
 
         function proximaMusica() {
