@@ -28,11 +28,51 @@
             width: 100%;
         }
         .track-album { font-size: 1.1rem; color: #28a745; margin-bottom: 5px; font-weight: 500; }
+        
+        /* Controles customizados com botões parcialmente transparentes */
         .custom-controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 15px; }
-        .btn { background: #28a745; border: none; color: white; padding: 12px 24px; font-size: 1rem; border-radius: 50px; cursor: pointer; transition: background 0.2s; }
-        .btn:hover { background: #218838; }
+        .btn {
+            background: rgba(40, 167, 69, 0.15);
+            border: none;
+            color: #2ea44f;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+        }
+        .btn:hover {
+            background: rgba(40, 167, 69, 0.85);
+            border-color: #28a745;
+            color: white;
+        }
 
-        .playlist-area { width: 100%; background: #161616; border-radius: 12px; padding: 15px; max-height: 600px; overflow-y: auto; border: 1px solid #2f2f2f; }
+        /* Área da Playlist com scrollbar customizada para Firefox e Webkit */
+        .playlist-area { 
+            width: 100%; 
+            background: #161616; 
+            border-radius: 12px; 
+            padding: 15px; 
+            max-height: 600px; 
+            overflow-y: auto; 
+            border: 1px solid #2f2f2f;
+        }
+        
+        /* Scrollbar Customizada para Chrome, Edge e Safari */
+        .playlist-area::-webkit-scrollbar { width: 4px; }
+        .playlist-area::-webkit-scrollbar-track {
+            background: transparent; /* Fundo da pista do scroll invisível */
+        }
+        .playlist-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        .playlist-area:hover::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25); /* Só destaca mais se o mouse estiver sobre a lista */
+        }
+
         .playlist-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2f2f2f; }
         .playlist-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background 0.2s; margin-bottom: 8px; }
         .playlist-item:hover { background: #272727; }
