@@ -62,7 +62,7 @@
         /* Scrollbar Customizada para Chrome, Edge e Safari */
         .playlist-area::-webkit-scrollbar { width: 4px; }
         .playlist-area::-webkit-scrollbar-track {
-            background: transparent; /* Fundo da pista do scroll invisível */
+            background: transparent; 
         }
         .playlist-area::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.1); 
@@ -70,7 +70,7 @@
             transition: background 0.2s;
         }
         .playlist-area:hover::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.25); /* Só destaca mais se o mouse estiver sobre a lista */
+            background: rgba(255, 255, 255, 0.25); 
         }
 
         .playlist-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2f2f2f; }
@@ -80,6 +80,36 @@
         .thumb-preview { width: 80px; height: 45px; background-color: #000; border-radius: 4px; object-fit: cover; }
         .item-info { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-title { font-size: 0.95rem; font-weight: bold; }
+
+        /* --- Estrutura e Animação do Descanso de Tela --- */
+        #screensaver {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            z-index: 9999;
+            display: none;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        #screensaver-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: kenBurnsEffect 30s ease-in-out infinite alternate;
+        }
+
+        @keyframes kenBurnsEffect {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.2);
+            }
+        }
 
         @media (min-width: 900px) {
             .main-layout { flex-direction: row; }
@@ -101,6 +131,7 @@
             <div class="custom-controls">
                 <button class="btn" onclick="musicaAnterior()">⏮ Voltar</button>
                 <button class="btn" onclick="proximaMusica()">Avançar ⏭</button>
+                <button class="btn" onclick="iniciarDescansoTela()">⛶</button>
             </div>
         </div>
 
@@ -108,6 +139,10 @@
             <div class="playlist-header">Fila de Reprodução</div>
             <div id="lista-renderizada"></div>
         </div>
+    </div>
+
+    <div id="screensaver" onclick="fecharDescansoTela()">
+        <img id="screensaver-img" src="" alt="Descanso de Tela">
     </div>
 
     <script>
@@ -121,6 +156,12 @@
         const txtTitulo = document.getElementById('titulo');
         const txtAlbum = document.getElementById('album-tag');
         const containerLista = document.getElementById('lista-renderizada');
+
+        // Referências do Descanso de Tela
+        const screensaver = document.getElementById('screensaver');
+        const screensaverImg = document.getElementById('screensaver-img');
+        let temporizadorInatividade;
+        const TEMPO_INATIVIDADE = 5 * 60 * 1000; // 5 minutos em milissegundos
 
         function renderizarInterfaceLista() {
             containerLista.innerHTML = '';
@@ -189,6 +230,7 @@
             }
 
             renderizarInterfaceLista();
+            atualizarImagemDescansoTela();
 
             if ('mediaSession' in navigator) {
                 let mTitulo = txtTitulo.innerText;
@@ -256,8 +298,45 @@
             player.play();
         }
 
+        /* --- Lógica do Descanso de Tela --- */
+        function atualizarImagemDescansoTela() {
+            if (player.poster) {
+                screensaverImg.src = player.poster;
+            } else {
+                // SVG de fallback caso a mídia atual não possua imagem de capa
+                screensaverImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450"><rect width="100%" height="100%" fill="%23222"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23444" font-family="Arial" font-size="24">Sem Capa</text></svg>';
+            }
+        }
+
+        function iniciarDescansoTela() {
+            atualizarImagemDescansoTela();
+            screensaver.style.display = 'block';
+        }
+
+        function fecharDescansoTela() {
+            screensaver.style.display = 'none';
+            resetarTemporizadorInatividade();
+        }
+
+        function resetarTemporizadorInatividade() {
+            clearTimeout(temporizadorInatividade);
+            // Só ativa automaticamente se o descanso de tela não estiver visível no momento
+            if (screensaver.style.display !== 'block') {
+                temporizadorInatividade = setTimeout(iniciarDescansoTela, TEMPO_INATIVIDADE);
+            }
+        }
+
+        // Detecta interações do usuário para adiar o acionamento automático
+        const eventosInteracao = ['mousemove', 'keydown', 'click', 'touchstart'];
+        eventosInteracao.forEach(evento => {
+            window.addEventListener(evento, resetarTemporizadorInatividade);
+        });
+
         player.addEventListener('ended', proximaMusica);
-        window.onload = () => { carregarElemento(0, 0); };
+        window.onload = () => { 
+            carregarElemento(0, 0); 
+            resetarTemporizadorInatividade();
+        };
     </script>
 </body>
 </html>
