@@ -102,13 +102,27 @@
             animation: kenBurnsEffect 30s ease-in-out infinite alternate;
         }
 
+        /* Nova Barra de Progresso do Descanso de Tela (Fixa na base, não escala com a foto) */
+        .screensaver-progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 10000;
+        }
+
+        .screensaver-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #28a745; /* Acompanhando o verde padrão do seu player */
+            transition: width 0.1s linear;
+        }
+
         @keyframes kenBurnsEffect {
-            0% {
-                transform: scale(1);
-            }
-            100% {
-                transform: scale(1.2);
-            }
+            0% { transform: scale(1); }
+            100% { transform: scale(1.2); }
         }
 
         @media (min-width: 900px) {
@@ -143,6 +157,9 @@
 
     <div id="screensaver" onclick="fecharDescansoTela()">
         <img id="screensaver-img" src="" alt="Descanso de Tela">
+        <div class="screensaver-progress-container">
+            <div id="screensaver-bar" class="screensaver-progress-bar"></div>
+        </div>
     </div>
 
     <script>
@@ -297,6 +314,8 @@
         }
 
         /* --- Lógica do Descanso de Tela (Apenas Manual) --- */
+        const screensaverBar = document.getElementById('screensaver-bar');
+
         function atualizarImagemDescansoTela() {
             if (player.poster) {
                 screensaverImg.src = player.poster;
@@ -313,6 +332,16 @@
         function fecharDescansoTela() {
             screensaver.style.display = 'none';
         }
+
+        // Atualiza a barra visual do descanso de tela conforme a mídia toca
+        player.addEventListener('timeupdate', () => {
+            if (player.duration) {
+                const porcentagem = (player.currentTime / player.duration) * 100;
+                screensaverBar.style.width = porcentagem + '%';
+            } else {
+                screensaverBar.style.width = '0%';
+            }
+        });
 
         player.addEventListener('ended', proximaMusica);
         window.onload = () => { 
