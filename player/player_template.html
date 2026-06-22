@@ -160,8 +160,6 @@
         // Referências do Descanso de Tela
         const screensaver = document.getElementById('screensaver');
         const screensaverImg = document.getElementById('screensaver-img');
-        let temporizadorInatividade;
-        const TEMPO_INATIVIDADE = 5 * 60 * 1000; // 5 minutos em milissegundos
 
         function renderizarInterfaceLista() {
             containerLista.innerHTML = '';
@@ -298,12 +296,11 @@
             player.play();
         }
 
-        /* --- Lógica do Descanso de Tela --- */
+        /* --- Lógica do Descanso de Tela (Apenas Manual) --- */
         function atualizarImagemDescansoTela() {
             if (player.poster) {
                 screensaverImg.src = player.poster;
             } else {
-                // SVG de fallback caso a mídia atual não possua imagem de capa
                 screensaverImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450"><rect width="100%" height="100%" fill="%23222"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23444" font-family="Arial" font-size="24">Sem Capa</text></svg>';
             }
         }
@@ -315,27 +312,11 @@
 
         function fecharDescansoTela() {
             screensaver.style.display = 'none';
-            resetarTemporizadorInatividade();
         }
-
-        function resetarTemporizadorInatividade() {
-            clearTimeout(temporizadorInatividade);
-            // Só ativa automaticamente se o descanso de tela não estiver visível no momento
-            if (screensaver.style.display !== 'block') {
-                temporizadorInatividade = setTimeout(iniciarDescansoTela, TEMPO_INATIVIDADE);
-            }
-        }
-
-        // Detecta interações do usuário para adiar o acionamento automático
-        const eventosInteracao = ['mousemove', 'keydown', 'click', 'touchstart'];
-        eventosInteracao.forEach(evento => {
-            window.addEventListener(evento, resetarTemporizadorInatividade);
-        });
 
         player.addEventListener('ended', proximaMusica);
         window.onload = () => { 
             carregarElemento(0, 0); 
-            resetarTemporizadorInatividade();
         };
     </script>
 </body>
