@@ -30,7 +30,7 @@
         .track-album { font-size: 1.1rem; color: #28a745; margin-bottom: 5px; font-weight: 500; }
         
         /* Controles customizados com botões parcialmente transparentes */
-        .custom-controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 15px; }
+        .custom-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; }
         .btn {
             background: rgba(40, 167, 69, 0.15);
             border: none;
@@ -126,13 +126,13 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            height: 120vh; /* 120% da altura da tela */
-            width: 120vh;  /* Mantém proporção 1:1 perfeita para o círculo */
+            height: 120vh;
+            width: 120vh;
             z-index: 2;
-            display: none; /* Ativado via JS */
+            display: none;
             justify-content: center;
             align-items: center;
-            pointer-events: none; /* Permite clicar no fundo para fechar */
+            pointer-events: none;
         }
 
         .cd-disc {
@@ -172,26 +172,6 @@
                         linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%);
             z-index: 2;
             pointer-events: none;
-        }
-
-        /* Controle de alternar modo interno do Screensaver */
-        .screensaver-toggle-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 10001;
-            transition: background 0.2s;
-            font-size: 0.9rem;
-        }
-        .screensaver-toggle-btn:hover {
-            background: #28a745;
         }
 
         /* Barra de Progresso do Descanso de Tela */
@@ -242,7 +222,10 @@
             <div class="custom-controls">
                 <button class="btn" onclick="musicaAnterior()">⏮ Voltar</button>
                 <button class="btn" onclick="proximaMusica()">Avançar ⏭</button>
-                <button class="btn" onclick="iniciarDescansoTela()">⛶</button>
+                <div>
+                    <button class="btn" style="padding-right: 8px; border-top-right-radius: 4px; border-bottom-right-radius: 4px;" onclick="alternarModoScreensaver()">Efeito: CD</button>
+                    <button class="btn" style="padding-left: 8px; border-top-left-radius: 4px; border-bottom-left-radius: 4px;" onclick="iniciarDescansoTela()">⛶</button>
+                </div>
             </div>
         </div>
 
@@ -252,10 +235,8 @@
         </div>
     </div>
 
-    <div id="screensaver">
-        <button class="screensaver-toggle-btn" onclick="alternarModoScreensaver(event)">⟳</button>
-        
-        <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;" onclick="fecharDescansoTela()">
+    <div id="screensaver" onclick="fecharDescansoTela()">
+        <div style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;">
             <img id="screensaver-img" src="" alt="Descanso de Tela">
             <img id="screensaver-bg-blur" class="screensaver-bg-blur" src="" alt="Fundo Borrado" style="display: none;">
         </div>
@@ -426,8 +407,8 @@
         const cdContainer = document.getElementById('cd-container');
         const cdDisc = document.getElementById('cd-disc');
         
-        // Modos: 'kenburns' ou 'cd'
-        let modoScreensaverAtual = 'kenburns'; 
+        // Modos: 'cd' (Padrão) ou 'kenburns'
+        let modoScreensaverAtual = 'cd'; 
 
         function atualizarImagemDescansoTela() {
             const imagemCapa = player.poster;
@@ -435,11 +416,9 @@
             
             const srcFinal = imagemCapa ? imagemCapa : svgFallback;
 
-            // Atualiza as imagens de fundo
             screensaverImg.src = srcFinal;
             screensaverBgBlur.src = srcFinal;
 
-            // Atualiza a textura do CD
             if (imagemCapa) {
                 cdDisc.style.backgroundImage = `url('${imagemCapa}')`;
             } else {
@@ -461,10 +440,17 @@
             }
         }
 
-        function alternarModoScreensaver(event) {
-            // Evita que o clique feche o screensaver
-            event.stopPropagation(); 
-            modoScreensaverAtual = modoScreensaverAtual === 'kenburns' ? 'cd' : 'kenburns';
+        function alternarModoScreensaver() {
+            const btnAlternar = document.querySelector("button[onclick='alternarModoScreensaver()']");
+            
+            if (modoScreensaverAtual === 'cd') {
+                modoScreensaverAtual = 'kenburns';
+                btnAlternar.innerText = 'Efeito: Zoom';
+            } else {
+                modoScreensaverAtual = 'cd';
+                btnAlternar.innerText = 'Efeito: CD';
+            }
+            
             aplicarVisibilidadeModo();
         }
 
@@ -477,7 +463,6 @@
             screensaver.style.display = 'none';
         }
 
-        // Atualiza a barra visual do descanso de tela conforme a mídia toca
         player.addEventListener('timeupdate', () => {
             if (player.duration) {
                 const porcentagem = (player.currentTime / player.duration) * 100;
