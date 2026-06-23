@@ -157,17 +157,30 @@
             }
 
             try {
-                // REQUISIÇÃO ASSÍNCRONA VANILLA: Lê o arquivo template estático que está na mesma pasta do servidor
-                const resposta = await fetch('player_template.html');
-                if (!resposta.ok) throw new Error('Não foi possível carregar o player_template.html');
+                // Executa requisições paralelas para buscar o template e as partes modulares isoladas do descanso de tela
+                const [resTemplate, resCSS, resJS] = await Promise.all([
+                    fetch('player_template.html'),
+                    fetch('screensaver.css'),
+                    fetch('screensaver.js')
+                ]);
 
-                const templateHtml = await resposta.text();
+                if (!resTemplate.ok) throw new Error('Não foi possível carregar o player_template.html');
+                if (!resCSS.ok) throw new Error('Não foi possível carregar o screensaver.css');
+                if (!resJS.ok) throw new Error('Não foi possível carregar o screensaver.js');
 
-                // Montagem limpa do JSON e injeção textual
+                const templateHtml = await resTemplate.text();
+                const cssScreensaver = await resCSS.text();
+                const jsScreensaver = await resJS.text();
+
+                // Formatação estruturada do JSON de mídias
                 const jsonString = JSON.stringify(listaMistaVisivel, null, 4);
-                const htmlPronto = templateHtml.replace('"__DADOS_PLAYLIST__"', jsonString);
 
-                // Executa o download automático do arquivo montado
+                // Executa a montagem em cadeia substituindo as tags coringas pelos conteúdos puros
+                let htmlPronto = templateHtml.replace('"__DADOS_PLAYLIST__"', jsonString);
+                htmlPronto = htmlPronto.replace('/*__CSS_SCREENSAVER__*/', cssScreensaver);
+                htmlPronto = htmlPronto.replace('/*__JS_SCREENSAVER__*/', jsScreensaver);
+
+                // Executa o download automático do arquivo empacotado compilado
                 const blob = new Blob([htmlPronto], { type: 'text/html' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -177,7 +190,7 @@
                 document.body.removeChild(link);
 
             } catch (erro) {
-                alert('Erro ao carregar o template: ' + erro.message);
+                alert('Erro ao carregar os módulos do template: ' + erro.message);
                 console.error(erro);
             }
         });

@@ -1,0 +1,120 @@
+/* --- Estrutura e Animação do Descanso de Tela --- */
+#screensaver {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    z-index: 9999;
+    display: none;
+    overflow: hidden;
+}
+
+/* Fundo Borrado (Usado no modo CD) */
+.screensaver-bg-blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(4px) brightness(0.5);
+    z-index: 1;
+    transition: opacity 0.5s ease;
+}
+
+/* Imagem Padrão Ken Burns */
+#screensaver-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    animation: kenBurnsEffect 30s ease-in-out infinite alternate;
+    transition: opacity 0.5s ease;
+}
+
+/* --- Estrutura do CD Giratório --- */
+.cd-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 120vh;
+    width: 120vh;
+    z-index: 2;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.cd-disc {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(0,0,0,0.6);
+    position: relative;
+    animation: girarCD 120s linear infinite;
+}
+
+/* Furo central do CD e efeito de ranhuras reflexivas plásticas */
+.cd-disc::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12%;
+    height: 12%;
+    background: #0f0f0f;
+    border-radius: 50%;
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.05), inset 0 0 20px rgba(0,0,0,0.9);
+    z-index: 3;
+}
+
+/* Brilho reflexivo simulando o plástico do CD */
+.cd-disc::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%),
+                linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%),
+                linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Barra de Progresso do Descanso de Tela */
+.screensaver-progress-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 10000;
+}
+
+.screensaver-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: #28a745;
+    transition: width 0.1s linear;
+}
+
+@keyframes kenBurnsEffect {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.2); }
+}
+
+@keyframes girarCD {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

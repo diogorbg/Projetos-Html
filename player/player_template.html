@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Player Organizado</title>
+    <title>Meu Player</title>
     <style>
         * { box-sizing: border-box; }
         body { 
@@ -44,7 +44,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            height: 48px; /* Altura fixa para garantir alinhamento perfeito entre todos */
+            height: 48px;
         }
         .btn:hover {
             background: rgba(40, 167, 69, 0.85);
@@ -63,7 +63,6 @@
             border-top-left-radius: 50px;
             border-bottom-left-radius: 50px;
             padding-right: 16px;
-            _border-right: 1px solid rgba(40, 167, 69, 0.3);
         }
         .btn-group .btn-right {
             border-top-right-radius: 50px;
@@ -82,19 +81,14 @@
             border: 1px solid #2f2f2f;
         }
         
-        /* Scrollbar Customizada para Chrome, Edge e Safari */
         .playlist-area::-webkit-scrollbar { width: 4px; }
-        .playlist-area::-webkit-scrollbar-track {
-            background: transparent; 
-        }
+        .playlist-area::-webkit-scrollbar-track { background: transparent; }
         .playlist-area::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.1); 
             border-radius: 10px;
             transition: background 0.2s;
         }
-        .playlist-area:hover::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.25); 
-        }
+        .playlist-area:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); }
 
         .playlist-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2f2f2f; }
         .playlist-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background 0.2s; margin-bottom: 8px; }
@@ -104,131 +98,13 @@
         .item-info { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-title { font-size: 0.95rem; font-weight: bold; }
 
-        /* --- Estrutura e Animação do Descanso de Tela --- */
-        #screensaver {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #000;
-            z-index: 9999;
-            display: none;
-            overflow: hidden;
-        }
-
-        /* Fundo Borrado (Usado no modo CD) */
-        .screensaver-bg-blur {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: blur(4px) brightness(0.5);
-            z-index: 1;
-            transition: opacity 0.5s ease;
-        }
-
-        /* Imagem Padrão Ken Burns */
-        #screensaver-img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-            animation: kenBurnsEffect 30s ease-in-out infinite alternate;
-            transition: opacity 0.5s ease;
-        }
-
-        /* --- Estrutura do CD Giratório --- */
-        .cd-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            height: 120vh;
-            width: 120vh;
-            z-index: 2;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            pointer-events: none;
-        }
-
-        .cd-disc {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(0,0,0,0.6);
-            position: relative;
-            animation: girarCD 120s linear infinite;
-        }
-
-        /* Furo central do CD e efeito de ranhuras reflexivas plásticas */
-        .cd-disc::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 12%;
-            height: 12%;
-            background: #0f0f0f;
-            border-radius: 50%;
-            box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.05), inset 0 0 20px rgba(0,0,0,0.9);
-            z-index: 3;
-        }
-
-        /* Brilho reflexivo simulando o plástico do CD */
-        .cd-disc::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            border-radius: 50%;
-            background: radial-gradient(circle, transparent 40%, rgba(255,255,255,0.03) 50%, transparent 60%),
-                        linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%),
-                        linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%);
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        /* Barra de Progresso do Descanso de Tela */
-        .screensaver-progress-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 10000;
-        }
-
-        .screensaver-progress-bar {
-            width: 0%;
-            height: 100%;
-            background: #28a745;
-            transition: width 0.1s linear;
-        }
-
-        @keyframes kenBurnsEffect {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.2); }
-        }
-
-        @keyframes girarCD {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         @media (min-width: 900px) {
             .main-layout { flex-direction: row; }
             .playlist-area { width: 380px; max-height: 600px; }
         }
+
+        /* Injeção dinâmica do Estilo CSS do Screensaver */
+        /*__CSS_SCREENSAVER__*/
     </style>
 </head>
 <body>
@@ -274,7 +150,7 @@
     </div>
 
     <script>
-        // Os dados estruturados serão injetados aqui
+        // Os dados estruturados da playlist serão injetados aqui
         const itensMídia = "__DADOS_PLAYLIST__";
 
         let indiceItemAtual = 0;   
@@ -284,10 +160,6 @@
         const txtTitulo = document.getElementById('titulo');
         const txtAlbum = document.getElementById('album-tag');
         const containerLista = document.getElementById('lista-renderizada');
-
-        // Referências do Descanso de Tela
-        const screensaver = document.getElementById('screensaver');
-        const screensaverImg = document.getElementById('screensaver-img');
 
         function renderizarInterfaceLista() {
             containerLista.innerHTML = '';
@@ -356,7 +228,11 @@
             }
 
             renderizarInterfaceLista();
-            atualizarImagemDescansoTela();
+            
+            // Verifica se a função existe antes de chamar (garantindo estabilidade com o JS injetado)
+            if (typeof atualizarImagemDescansoTela === 'function') {
+                atualizarImagemDescansoTela();
+            }
 
             if ('mediaSession' in navigator) {
                 let mTitulo = txtTitulo.innerText;
@@ -424,83 +300,12 @@
             player.play();
         }
 
-        /* --- Lógica do Descanso de Tela --- */
-        const screensaverBar = document.getElementById('screensaver-bar');
-        const screensaverBgBlur = document.getElementById('screensaver-bg-blur');
-        const cdContainer = document.getElementById('cd-container');
-        const cdDisc = document.getElementById('cd-disc');
-        
-        // Modos: 'cd' (Padrão) ou 'kenburns'
-        let modoScreensaverAtual = 'cd'; 
-
-        function atualizarImagemDescansoTela() {
-            const imagemCapa = player.poster;
-            const svgFallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450"><rect width="100%" height="100%" fill="%23222"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23444" font-family="Arial" font-size="24">Sem Capa</text></svg>';
-            
-            const srcFinal = imagemCapa ? imagemCapa : svgFallback;
-
-            screensaverImg.src = srcFinal;
-            screensaverBgBlur.src = srcFinal;
-
-            if (imagemCapa) {
-                // Usar CSS.escape ou codificar os caracteres problemáticos (como aspas) resolve o conflito com as aspas do url()
-                const urlSegura = imagemCapa.replace(/'/g, "\\'");
-                cdDisc.style.backgroundImage = `url("${urlSegura}")`;
-            } else {
-                cdDisc.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="100%" height="100%" fill="%23333"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23555" font-family="Arial" font-size="30">CD Player</text></svg>')`;
-            }
-
-            aplicarVisibilidadeModo();
-        }
-
-        function aplicarVisibilidadeModo() {
-            if (modoScreensaverAtual === 'cd') {
-                screensaverImg.style.display = 'none';
-                screensaverBgBlur.style.display = 'block';
-                cdContainer.style.display = 'flex';
-            } else {
-                screensaverImg.style.display = 'block';
-                screensaverBgBlur.style.display = 'none';
-                cdContainer.style.display = 'none';
-            }
-        }
-
-        function alternarModoScreensaver() {
-            const btnAlternar = document.querySelector(".btn-left");
-            
-            if (modoScreensaverAtual === 'cd') {
-                modoScreensaverAtual = 'kenburns';
-                btnAlternar.innerText = 'Efeito: Zoom';
-            } else {
-                modoScreensaverAtual = 'cd';
-                btnAlternar.innerText = 'Efeito: CD';
-            }
-            
-            aplicarVisibilidadeModo();
-        }
-
-        function iniciarDescansoTela() {
-            atualizarImagemDescansoTela();
-            screensaver.style.display = 'block';
-        }
-
-        function fecharDescansoTela() {
-            screensaver.style.display = 'none';
-        }
-
-        player.addEventListener('timeupdate', () => {
-            if (player.duration) {
-                const porcentagem = (player.currentTime / player.duration) * 100;
-                screensaverBar.style.width = porcentagem + '%';
-            } else {
-                screensaverBar.style.width = '0%';
-            }
-        });
-
         player.addEventListener('ended', proximaMusica);
-        window.onload = () => { 
-            carregarElemento(0, 0); 
-        };
+        window.onload = () => { carregarElemento(0, 0); };
+
+        /* Injeção dinâmica do script js do Screensaver */
+        /*__JS_SCREENSAVER__*/
     </script>
+
 </body>
 </html>
