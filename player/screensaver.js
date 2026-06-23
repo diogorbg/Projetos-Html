@@ -7,12 +7,12 @@ const cdContainer = document.getElementById('cd-container');
 const cdDisc = document.getElementById('cd-disc');
 
 // Modos: 'cd' (Padrão) ou 'kenburns'
-let modoScreensaverAtual = 'cd'; 
+let modoScreensaverAtual = 'cd';
 
 function atualizarImagemDescansoTela() {
     const imagemCapa = player.poster;
     const svgFallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450"><rect width="100%" height="100%" fill="%23222"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23444" font-family="Arial" font-size="24">Sem Capa</text></svg>';
-    
+
     const srcFinal = imagemCapa ? imagemCapa : svgFallback;
 
     screensaverImg.src = srcFinal;
@@ -42,7 +42,7 @@ function aplicarVisibilidadeModo() {
 
 function alternarModoScreensaver() {
     const btnAlternar = document.querySelector(".btn-left");
-    
+
     if (modoScreensaverAtual === 'cd') {
         modoScreensaverAtual = 'kenburns';
         btnAlternar.innerText = 'Efeito: Zoom';
@@ -50,7 +50,7 @@ function alternarModoScreensaver() {
         modoScreensaverAtual = 'cd';
         btnAlternar.innerText = 'Efeito: CD';
     }
-    
+
     aplicarVisibilidadeModo();
 }
 
