@@ -63,6 +63,15 @@
     animation: girarCD 120s linear infinite;
 }
 
+/* Modificadores de posicionamento da Textura da Capa */
+.cd-disc.foco-esquerda {
+    background-position: left center;
+}
+
+.cd-disc.foco-direita {
+    background-position: right center;
+}
+
 /* Furo central do CD e efeito de ranhuras reflexivas plásticas */
 .cd-disc::before {
     content: '';

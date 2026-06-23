@@ -10,6 +10,27 @@ const cdDisc = document.getElementById('cd-disc');
 let modoScreensaverAtual = 'cd';
 
 function atualizarImagemDescansoTela() {
+    const item = itensMídia[indiceItemAtual];
+    let focoAtual = 'centro';
+
+    // Determina o foco baseado no tipo de mídia atual
+    if (item) {
+        if (item.tipo === 'musica') {
+            focoAtual = item.dados.foco || 'centro';
+        } else if (item.musicas && item.musicas[indiceSubMusica]) {
+            // Em coleções, prioriza o foco da música específica; se não houver, usa o da coleção
+            focoAtual = item.musicas[indiceSubMusica].foco || item.foco || 'centro';
+        }
+    }
+
+    // Limpa classes anteriores de posicionamento do CD
+    cdDisc.classList.remove('foco-esquerda', 'foco-direita');
+    if (focoAtual === 'esquerda') {
+        cdDisc.classList.add('foco-esquerda');
+    } else if (focoAtual === 'direita') {
+        cdDisc.classList.add('foco-direita');
+    }
+
     const imagemCapa = player.poster;
     const svgFallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450"><rect width="100%" height="100%" fill="%23222"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23444" font-family="Arial" font-size="24">Sem Capa</text></svg>';
 

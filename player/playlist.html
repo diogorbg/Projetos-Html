@@ -95,21 +95,33 @@
                 const estaNaRaiz = partes.length === 2;
 
                 const caminhoRelativoComSubpasta = partes.slice(1).join('/');
-                const nomeSemExtensao = mp3.name.substring(0, mp3.name.lastIndexOf('.'));
+                let nomeSemExtensao = mp3.name.substring(0, mp3.name.lastIndexOf('.'));
                 const subpastaNome = !estaNaRaiz ? partes[partes.length - 2] : null;
+
+                // Lógica de detecção de foco e limpeza do sufixo no título
+                let focoCapa = 'centro';
+                if (nomeSemExtensao.endsWith('_e')) {
+                    focoCapa = 'esquerda';
+                    nomeSemExtensao = nomeSemExtensao.slice(0, -2);
+                } else if (nomeSemExtensao.endsWith('_d')) {
+                    focoCapa = 'direita';
+                    nomeSemExtensao = nomeSemExtensao.slice(0, -2);
+                }
 
                 const temImagemPropria = arquivos.some(arq => {
                     const partesImg = arq.webkitRelativePath.split('/');
                     const nomeImgSemExtensao = arq.name.substring(0, arq.name.lastIndexOf('.'));
 
+                    // Verifica tanto com o sufixo original quanto limpado caso a imagem use ou não a mesma convenção
                     return arq.name.toLowerCase().endsWith('.jpg') &&
-                        nomeSemExtensao.toLowerCase() === nomeImgSemExtensao.toLowerCase() &&
+                        (mp3.name.substring(0, mp3.name.lastIndexOf('.')).toLowerCase() === nomeImgSemExtensao.toLowerCase()) &&
                         partes.slice(0, -1).join('/') === partesImg.slice(0, -1).join('/');
                 });
 
                 const dadosMusica = {
                     titulo: nomeSemExtensao,
                     audioUrl: caminhoRelativoComSubpasta,
+                    foco: focoCapa,
                     capaUrl: temImagemPropria ? caminhoRelativoComSubpasta.substring(0, caminhoRelativoComSubpasta.lastIndexOf('.')) + '.jpg' : ''
                 };
 
@@ -121,6 +133,7 @@
                             tipo: 'colecao',
                             nomeColecao: subpastaNome,
                             capaColecaoUrl: '',
+                            foco: 'centro', // Padrão da coleção que pode ser herdado da primeira música
                             musicas: []
                         };
                     }
@@ -133,6 +146,7 @@
                 const musicaComCapa = colecao.musicas.find(m => m.capaUrl !== '');
                 if (musicaComCapa) {
                     colecao.capaColecaoUrl = musicaComCapa.capaUrl;
+                    colecao.foco = musicaComCapa.foco; // Herda o foco da música base da capa
                 } else {
                     const qualquerImagemNaPasta = arquivos.find(arq => {
                         const partesImg = arq.webkitRelativePath.split('/');
@@ -141,13 +155,17 @@
                     });
                     if (qualquerImagemNaPasta) {
                         colecao.capaColecaoUrl = qualquerImagemNaPasta.webkitRelativePath.split('/').slice(1).join('/');
+                        
+                        // Verifica se o arquivo físico da imagem da pasta possui o sufixo
+                        const nomeImg = qualquerImagemNaPasta.name.substring(0, qualquerImagemNaPasta.name.lastIndexOf('.'));
+                        if (nomeImg.endsWith('_e')) colecao.foco = 'esquerda';
+                        if (nomeImg.endsWith('_d')) colecao.foco = 'direita';
                     }
                 }
                 listaMistaVisivel.push(colecao);
             }
 
             try {
-                // Executa requisições paralelas para buscar o template e as partes modulares isoladas do descanso de tela
                 const [resTemplate, resCSS, resJS] = await Promise.all([
                     fetch('player_template.html'),
                     fetch('screensaver.css'),
@@ -162,15 +180,12 @@
                 const cssScreensaver = await resCSS.text();
                 const jsScreensaver = await resJS.text();
 
-                // Formatação estruturada do JSON de mídias
                 const jsonString = JSON.stringify(listaMistaVisivel, null, 4);
 
-                // Executa a montagem em cadeia substituindo as tags coringas pelos conteúdos puros
                 let htmlPronto = templateHtml.replace('"__DADOS_PLAYLIST__"', jsonString);
                 htmlPronto = htmlPronto.replace('/*__CSS_SCREENSAVER__*/', cssScreensaver);
                 htmlPronto = htmlPronto.replace('/*__JS_SCREENSAVER__*/', jsScreensaver);
 
-                // Executa o download automático do arquivo empacotado compilado
                 const blob = new Blob([htmlPronto], { type: 'text/html' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
