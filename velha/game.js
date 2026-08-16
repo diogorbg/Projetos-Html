@@ -36,7 +36,7 @@ function render() {
     state.board.forEach((stack, i) => {
         const cell = document.createElement('div');
         cell.className = 'cell';
-        
+
         if (stack.length > 0) {
             const topPiece = stack[stack.length - 1];
             const img = document.createElement('img');
@@ -61,12 +61,12 @@ function render() {
     [1, 2].forEach(p => {
         const container = document.querySelector(`#bank-${p} .pieces-container`);
         container.innerHTML = '';
-        
+
         state.banks[p].forEach((size, idx) => {
             const img = document.createElement('img');
             img.src = getPieceFileName(size, p);
             img.className = 'piece-icon';
-            
+
             // Marca a peça selecionada
             if (state.turn === p && state.selected?.idx === idx) {
                 img.classList.add('selected');
@@ -75,7 +75,7 @@ function render() {
             img.onclick = (e) => {
                 e.stopPropagation();
                 if (state.winner || state.turn !== p) return;
-                
+
                 if (state.selected?.idx === idx) {
                     state.selected = null; // Desmarca se clicar de novo
                 } else {
@@ -98,9 +98,16 @@ function play(cellIndex) {
     if (state.winner || !state.selected) return;
 
     const stack = state.board[cellIndex];
-    const topPiece = stack.length > 0 ? stack[stack.length - 1] : { size: 0 };
+    const topPiece = stack.length > 0 ? stack[stack.length - 1] : { size: 0, player: 0 };
 
-    // Regra: A peça nova deve ser estritamente maior que a peça do topo
+    // REGRA DE VALIDAÇÃO:
+    // Não pode cobrir uma peça do próprio jogador
+    if (topPiece.player === state.turn) {
+        alert("Você não pode cobrir uma peça que já é sua!");
+        return;
+    }
+
+    // A peça nova deve ser estritamente maior que a peça do topo (se houver peça adversária)
     if (state.selected.size > topPiece.size) {
         // Adiciona ao tabuleiro
         stack.push({
@@ -122,7 +129,7 @@ function play(cellIndex) {
 
         render();
     } else {
-        alert("A peça precisa ser estritamente maior que a que já está no tabuleiro!");
+        alert("A peça precisa ser estritamente maior que a peça do adversário que está no tabuleiro!");
     }
 }
 
