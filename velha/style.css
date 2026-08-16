@@ -96,3 +96,35 @@ button#reset-btn {
     font-weight: bold;
     cursor: pointer;
 }
+
+/* Snackbar */
+#snackbar {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #870303;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 10;
+    bottom: 30px;
+    font-size: 14px;
+}
+#snackbar.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+@keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+@keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+/* Destaque de turno */
+.player-bank.active { border: 2px solid var(--accent); background: #2d3e5a; }
+
+/* Bancos em 1 linha */
+.pieces-container { 
+    display: flex; 
+    flex-direction: row; 
+    justify-content: center; 
+    gap: 4px; 
+    flex-wrap: nowrap; 
+}
+.piece-icon { width: 42px; height: 42px; } /* Reduzi um pouco para caber 1 linha */
+.piece-cell { width: 64px; height: 64px; }

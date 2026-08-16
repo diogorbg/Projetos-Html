@@ -21,6 +21,14 @@ function init() {
     render();
 }
 
+// Nova função helper para o Snackbar
+function showSnackbar(text) {
+    const snackbar = document.getElementById("snackbar");
+    snackbar.textContent = text;
+    snackbar.className = "show";
+    setTimeout(() => { snackbar.className = snackbar.className.replace("show", ""); }, 3000);
+}
+
 function render() {
     // Atualiza o texto de status
     const statusEl = document.getElementById('status');
@@ -41,7 +49,7 @@ function render() {
             const topPiece = stack[stack.length - 1];
             const img = document.createElement('img');
             img.src = getPieceFileName(topPiece.size, topPiece.player);
-            img.className = 'piece-icon';
+            img.className = 'piece-cell';
             cell.appendChild(img);
 
             // Badge para mostrar se há peças embaixo
@@ -57,30 +65,22 @@ function render() {
         boardEl.appendChild(cell);
     });
 
-    // Renderiza os Bancos dos Jogadores
+    // Renderiza Bancos e aplica classe 'active'
     [1, 2].forEach(p => {
-        const container = document.querySelector(`#bank-${p} .pieces-container`);
+        const bankEl = document.getElementById(`bank-${p}`);
+        bankEl.className = `player-bank ${state.turn === p ? 'active' : ''}`;
+
+        const container = bankEl.querySelector('.pieces-container');
         container.innerHTML = '';
 
         state.banks[p].forEach((size, idx) => {
             const img = document.createElement('img');
             img.src = getPieceFileName(size, p);
-            img.className = 'piece-icon';
-
-            // Marca a peça selecionada
-            if (state.turn === p && state.selected?.idx === idx) {
-                img.classList.add('selected');
-            }
-
+            img.className = 'piece-icon' + (state.selected?.idx === idx && state.turn === p ? ' selected' : '');
             img.onclick = (e) => {
                 e.stopPropagation();
                 if (state.winner || state.turn !== p) return;
-
-                if (state.selected?.idx === idx) {
-                    state.selected = null; // Desmarca se clicar de novo
-                } else {
-                    state.selected = { idx, size };
-                }
+                state.selected = (state.selected?.idx === idx) ? null : { idx, size };
                 render();
             };
             container.appendChild(img);
@@ -100,36 +100,25 @@ function play(cellIndex) {
     const stack = state.board[cellIndex];
     const topPiece = stack.length > 0 ? stack[stack.length - 1] : { size: 0, player: 0 };
 
-    // REGRA DE VALIDAÇÃO:
-    // Não pode cobrir uma peça do próprio jogador
     if (topPiece.player === state.turn) {
-        alert("Você não pode cobrir uma peça que já é sua!");
+        showSnackbar("Você não pode cobrir uma peça sua!");
         return;
     }
 
-    // A peça nova deve ser estritamente maior que a peça do topo (se houver peça adversária)
     if (state.selected.size > topPiece.size) {
-        // Adiciona ao tabuleiro
-        stack.push({
-            size: state.selected.size,
-            player: state.turn
-        });
-
-        // Remove do banco do jogador
+        stack.push({ size: state.selected.size, player: state.turn });
         state.banks[state.turn].splice(state.selected.idx, 1);
         state.selected = null;
 
-        // Verifica vitória
         if (checkWin(state.turn)) {
             state.winner = state.turn;
-        } else {
-            // Alterna turno
-            state.turn = state.turn === 1 ? 2 : 1;
+            showSnackbar(`Jogador ${state.winner} venceu!`);
         }
 
+        state.turn = state.turn === 1 ? 2 : 1;
         render();
     } else {
-        alert("A peça precisa ser estritamente maior que a peça do adversário que está no tabuleiro!");
+        showSnackbar("Peça muito pequena para esta posição!");
     }
 }
 
