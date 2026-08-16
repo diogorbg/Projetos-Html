@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Velha Come-Come - Nova Versão</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Velha Come-Come</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -11,17 +12,22 @@
     <div class="container">
         <h1>Velha Come-Come</h1>
         <div id="status">Vez do Jogador 1</div>
+
+        <!-- O layout agora empilha tudo verticalmente -->
         <div class="game-layout">
             <div class="player-bank" id="bank-1">
                 <h3>Jogador 1</h3>
                 <div class="pieces-container"></div>
             </div>
+
             <div class="board" id="board"></div>
+
             <div class="player-bank" id="bank-2">
                 <h3>Jogador 2</h3>
                 <div class="pieces-container"></div>
             </div>
         </div>
+
         <button id="reset-btn">Reiniciar Jogo</button>
     </div>
     <script src="game.js"></script>
