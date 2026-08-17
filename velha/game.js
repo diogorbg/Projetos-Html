@@ -87,6 +87,7 @@ function render() {
 
             const countText = document.createElement('span');
             countText.textContent = `${counts[size]}`;
+            countText.className = 'qtd';
             // countText.style.marginRight = "2px";
 
             wrapper.appendChild(countText);
