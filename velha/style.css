@@ -56,10 +56,10 @@ body {
 }
 
 .piece-icon {
-    width: 70px;
-    height: 70px;
+    width: 42px;
+    height: 42px;
     cursor: pointer;
-    border: 3px solid transparent;
+    border: 2px solid transparent;
     border-radius: 8px;
 }
 
@@ -69,21 +69,23 @@ body {
 }
 
 .player-bank {
-    width: 100%;
+    width: calc(100% - 16px);
     background: #1e293b;
-    padding: 10px;
-    border-radius: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    border: 2px solid transparent;
 }
 
 .pieces-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: row;
     justify-content: center;
-    gap: 5px;
-    margin-top: 5px;
+    gap: 4px;
+    flex-wrap: nowrap;
 }
 
 button#reset-btn {
@@ -111,20 +113,43 @@ button#reset-btn {
     bottom: 30px;
     font-size: 14px;
 }
-#snackbar.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-@keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
-@keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+#snackbar.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein {
+    from {
+        bottom: 0;
+        opacity: 0;
+    }
+
+    to {
+        bottom: 30px;
+        opacity: 1;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        bottom: 30px;
+        opacity: 1;
+    }
+
+    to {
+        bottom: 0;
+        opacity: 0;
+    }
+}
 
 /* Destaque de turno */
-.player-bank.active { border: 2px solid var(--accent); background: #2d3e5a; }
-
-/* Bancos em 1 linha */
-.pieces-container { 
-    display: flex; 
-    flex-direction: row; 
-    justify-content: center; 
-    gap: 4px; 
-    flex-wrap: nowrap; 
+.player-bank.active {
+    border: 2px solid var(--accent);
+    background: #2d3e5a;
 }
-.piece-icon { width: 42px; height: 42px; } /* Reduzi um pouco para caber 1 linha */
-.piece-cell { width: 64px; height: 64px; }
+
+.piece-cell {
+    width: 64px;
+    height: 64px;
+}
