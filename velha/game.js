@@ -30,60 +30,68 @@ function showSnackbar(text) {
 }
 
 function render() {
-    // Atualiza o texto de status
-    const statusEl = document.getElementById('status');
-    if (state.winner) {
-        statusEl.textContent = `🎉 Jogador ${state.winner} venceu!`;
-    } else {
-        statusEl.textContent = `Vez do Jogador ${state.turn}`;
-    }
+    // Atualiza cabeçalhos dos jogadores
+    [1, 2].forEach(p => {
+        const h3 = document.getElementById(`h3-${p}`);
+        let text = `Jogador ${p}`;
+        if (state.turn === p && !state.winner) text = `▶︎ ${text}`;
+        if (state.winner === p) text = `${text} 🎉`;
+        h3.textContent = text;
+    });
 
-    // Renderiza o Tabuleiro
+    // Renderiza o Tabuleiro (mesma lógica)
     const boardEl = document.getElementById('board');
     boardEl.innerHTML = '';
     state.board.forEach((stack, i) => {
         const cell = document.createElement('div');
         cell.className = 'cell';
-
         if (stack.length > 0) {
-            const topPiece = stack[stack.length - 1];
+            const top = stack[stack.length - 1];
             const img = document.createElement('img');
-            img.src = getPieceFileName(topPiece.size, topPiece.player);
+            img.src = getPieceFileName(top.size, top.player);
             img.className = 'piece-cell';
             cell.appendChild(img);
-
-            // Badge para mostrar se há peças embaixo
-            if (stack.length > 1) {
-                const badge = document.createElement('div');
-                badge.style.cssText = "position:absolute; bottom:2px; right:6px; font-size:0.7rem; background:rgba(0,0,0,0.6); padding:1px 4px; border-radius:4px;";
-                badge.textContent = `+${stack.length - 1}`;
-                cell.appendChild(badge);
-            }
         }
-
         cell.onclick = () => play(i);
         boardEl.appendChild(cell);
     });
 
-    // Renderiza Bancos e aplica classe 'active'
+    // Renderiza Bancos Agrupados por contagem
     [1, 2].forEach(p => {
         const bankEl = document.getElementById(`bank-${p}`);
         bankEl.className = `player-bank ${state.turn === p ? 'active' : ''}`;
-
         const container = bankEl.querySelector('.pieces-container');
         container.innerHTML = '';
 
-        state.banks[p].forEach((size, idx) => {
+        // Agrupando: {1: count, 2: count, 3: count}
+        const counts = { 1: 0, 2: 0, 3: 0 };
+        state.banks[p].forEach(size => counts[size]++);
+
+        [1, 2, 3].forEach(size => {
+            if (counts[size] === 0) return;
+            const wrapper = document.createElement('div');
+            wrapper.style.display = "flex";
+            wrapper.style.alignItems = "center";
+            wrapper.style.margin = "0 8px";
+
             const img = document.createElement('img');
             img.src = getPieceFileName(size, p);
-            img.className = 'piece-icon' + (state.selected?.idx === idx && state.turn === p ? ' selected' : '');
-            img.onclick = (e) => {
-                e.stopPropagation();
+            img.className = 'piece-icon' + (state.selected?.size === size && state.turn === p ? ' selected' : '');
+            img.onclick = () => {
                 if (state.winner || state.turn !== p) return;
-                state.selected = (state.selected?.idx === idx) ? null : { idx, size };
+                // Seleciona a primeira peça disponível desse tamanho
+                const idx = state.banks[p].indexOf(size);
+                state.selected = (state.selected?.size === size) ? null : { idx, size };
                 render();
             };
-            container.appendChild(img);
+
+            const countText = document.createElement('span');
+            countText.textContent = `${counts[size]}`;
+            // countText.style.marginRight = "2px";
+
+            wrapper.appendChild(countText);
+            wrapper.appendChild(img);
+            container.appendChild(wrapper);
         });
     });
 }
