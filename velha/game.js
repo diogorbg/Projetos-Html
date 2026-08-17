@@ -120,7 +120,7 @@ function play(cellIndex) {
 
         if (checkWin(state.turn)) {
             state.winner = state.turn;
-            showSnackbar(`Jogador ${state.winner} venceu!`);
+            showSnackbar(`Jogador ${state.winner} 🎉 venceu!`);
         }
 
         state.turn = state.turn === 1 ? 2 : 1;
