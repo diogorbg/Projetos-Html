@@ -35,7 +35,7 @@ function render() {
         const h3 = document.getElementById(`h3-${p}`);
         let text = `Jogador ${p}`;
         if (state.turn === p && !state.winner) text = `▶︎ ${text}`;
-        if (state.winner === p) text = `${text} 🎉`;
+        if (state.winner === p) text = `${text} 🎉 venceu!`;
         h3.textContent = text;
     });
 
