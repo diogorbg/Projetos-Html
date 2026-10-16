@@ -123,8 +123,9 @@
                 <div id="titulo" class="track-title">Nome da Música</div>
             </div>
             <div class="custom-controls">
-                <button class="btn" onclick="musicaAnterior()">⏮ Voltar</button>
-                <button class="btn" onclick="proximaMusica()">Avançar ⏭</button>
+                <button class="btn" onclick="musicaAnterior()">⏮</button>
+                <button class="btn" id="btn-play-pause" onclick="alternarPlayPause()">▶</button>
+                <button class="btn" onclick="proximaMusica()">⏭</button>
                 <div class="btn-group">
                     <button class="btn btn-left" onclick="alternarModoScreensaver()">Efeito: CD</button>
                     <button class="btn btn-right" onclick="iniciarDescansoTela()">⛶</button>
@@ -260,6 +261,20 @@
             player.play();
         }
 
+        function alternarPlayPause() {
+            const btnPlayPause = document.getElementById('btn-play-pause');
+            if (player.paused) {
+                player.play();
+                btnPlayPause.innerText = '❚❚';
+            } else {
+                player.pause();
+                btnPlayPause.innerText = '▶';
+            }
+        }
+        // Atualiza o texto do botão caso o player mude por outro meio (ex: tecla Enter)
+        player.onplay = () => { document.getElementById('btn-play-pause').innerText = '❚❚'; };
+        player.onpause = () => { document.getElementById('btn-play-pause').innerText = '▶'; };
+        
         function proximaMusica() {
             const item = itensMídia[indiceItemAtual];
 
