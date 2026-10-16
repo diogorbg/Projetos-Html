@@ -66,10 +66,10 @@ function alternarModoScreensaver() {
 
     if (modoScreensaverAtual === 'cd') {
         modoScreensaverAtual = 'kenburns';
-        btnAlternar.innerText = 'Efeito: Zoom';
+        if (btnAlternar) btnAlternar.innerText = 'Efeito: Zoom';
     } else {
         modoScreensaverAtual = 'cd';
-        btnAlternar.innerText = 'Efeito: CD';
+        if (btnAlternar) btnAlternar.innerText = 'Efeito: CD';
     }
 
     aplicarVisibilidadeModo();
@@ -93,3 +93,69 @@ player.addEventListener('timeupdate', () => {
         screensaverBar.style.width = '0%';
     }
 });
+
+// --- Atalhos de Controle Remoto exclusivos para o Descanso de Tela ---
+document.addEventListener('keydown', (event) => {
+    // Só executa se o descanso de tela estiver aberto/visível
+    if (screensaver.style.display === 'block') {
+
+        // Enter -> Play / Pause
+        if (event.key === 'Enter') {
+            alternarPlayPause();
+            event.preventDefault();
+        }
+        // Seta para a Direita -> Próxima Música
+        else if (event.key === 'ArrowRight') {
+            proximaMusica();
+            atualizarImagemDescansoTela(); // Atualiza a capa do screensaver para a nova música
+            event.preventDefault();
+        }
+        // Seta para a Esquerda -> Música Anterior
+        else if (event.key === 'ArrowLeft') {
+            musicaAnterior();
+            atualizarImagemDescansoTela(); // Atualiza a capa do screensaver para a música anterior
+            event.preventDefault();
+        }
+        // Seta para Baixo ou Backspace/Escape -> Sair do Descanso de Tela
+        else if (event.key === 'ArrowDown' || event.key === 'Escape' || event.key === 'Backspace') {
+            fecharDescansoTela();
+            event.preventDefault();
+        }
+        else if (event.key === 'ArrowUp') {
+            alternarModoScreensaver();
+        }
+    } else {
+        if (event.key === 'Escape' || event.key === 'Backspace') {
+            iniciarDescansoTela();
+            event.preventDefault();
+        }
+    }
+});
+
+const pausedIndicator = document.getElementById('screensaver-paused-indicator');
+
+// Atualiza a visibilidade do indicador de pausa
+function atualizarEstadoPausaVisual() {
+    if (screensaver.style.display === 'block') {
+        if (player.paused) {
+            pausedIndicator.style.display = 'flex';
+            // Opcional: para o CD parar de girar quando pausado
+            cdDisc.style.animationPlayState = 'paused';
+        } else {
+            pausedIndicator.style.display = 'none';
+            // Retorna o CD para girando normalmente
+            cdDisc.style.animationPlayState = 'running';
+        }
+    }
+}
+
+// Chame essa função dentro do iniciarDescansoTela()
+function iniciarDescansoTela() {
+    atualizarImagemDescansoTela();
+    atualizarEstadoPausaVisual(); // Garante que abre com o estado correto
+    screensaver.style.display = 'block';
+}
+
+// Escuta os eventos de play e pause do player global para atualizar em tempo real
+player.addEventListener('play', atualizarEstadoPausaVisual);
+player.addEventListener('pause', atualizarEstadoPausaVisual);
